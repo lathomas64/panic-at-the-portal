@@ -1,5 +1,6 @@
 import random
-from action import Action 
+from action import Action
+from movement import Movement
 
 class Character:
     # actions movement die in speed tokens out
@@ -31,22 +32,7 @@ class Character:
             self.action_pool.append(self.roll_die(die))
 
 # Basic actions
-class Movement(Action):
-    def __init__(self):
-        super(Movement, self).__init__()
-    
-    def available(self, pool=[], tokens={}) -> bool:
-        if len(pool) > 0:
-            return True 
-        else:
-            return False 
-    
-    def act(self, actor: Character, die:int):
-        actor.add_tokens("speed", die)
-        actor.action_pool.remove(die)
-    
-    def __repr__(self):
-        return "X: Movement"
+
 
 if __name__ == "__main__":
     oc = Character()
