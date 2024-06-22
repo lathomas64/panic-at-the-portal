@@ -20,3 +20,6 @@ action pool (dice), actions, health, range, position, tokens, obstacles,
 
 if we only implement the move action we still need
 action pool, actions, tokens, position. 
+
+---
+placing character at hex coordinates gives offset further away from center.
