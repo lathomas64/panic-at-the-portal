@@ -3,6 +3,8 @@ from ursina import *
 app = Ursina()
 
 class Hex(Entity):
+    map = {}
+    current_character = None
     base_color = color.white 
     hover_color = color.gray
     directions = {
@@ -22,27 +24,37 @@ class Hex(Entity):
         print(kwargs)
         super().__init__(x=x_offset, y=y_offset, model='quad',collider='box', texture=load_texture("hexbordered.png"), kwargs=kwargs)
         self.on_click = self.clicked
+        self.tooltip = Tooltip(str((q,r))+"::"+str(abs(q+r))+"::"+str(max(abs(q),abs(r))))
+
+    def distance(self, otherHex):
+        q = self.q - otherHex.q
+        r = self.r - otherHex.r
+        return max([abs(q+r), abs(q), abs(r)])
     def update(self):
         if(self.hovered):
             self.color = Hex.hover_color
+            self.tooltip.text = str(self.distance(Hex.current_character.parent)) + " speed tokens"
+            self.tooltip.enabled = True
         else:
             self.color = Hex.base_color
+            self.tooltip.enabled = False
+        if(self.distance(Hex.current_character.parent) <= 2):
+            self.color = color.green
     def clicked(self):
         print("clicked:",self.q,self.r)
         Hex.hover_color = color.random_color()
-        player.x = self.x 
-        player.y = self.y
+        Hex.current_character.parent = self
     @classmethod
     def create_map(cls, radius):
-        result = {}
+        cls.map = {}
         for q in range(-radius, radius+1):
             for r in range(-radius, radius+1):
                 if abs(q+r) <=radius:
                     hex = Hex(q,r)
-                    result[(q,r)] = hex
-        return result
+                    cls.map[(q,r)] = hex
+        return cls.map
 
-my_map = Hex.create_map(3)
+my_map = Hex.create_map(4)
 player = SpriteSheetAnimation("placeholder_character.png", scale=.5, fps=4, z=-1, tileset_size=[4,4], animations={
     'idle' : ((0,3), (0,3)),        # makes an animation from (0,0) to (0,0), a single frame
     'walk_up' : ((0,0), (3,0)),     # makes an animation from (0,0) to (3,0), the bottom row
@@ -52,6 +64,7 @@ player = SpriteSheetAnimation("placeholder_character.png", scale=.5, fps=4, z=-1
     })
 
 player.play_animation('walk_down')
-
+player.parent = Hex.map[(0,0)]
+Hex.current_character = player
 
 app.run()
