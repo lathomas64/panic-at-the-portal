@@ -10,6 +10,7 @@ class Character(SpriteSheetAnimation):
         self.action_pool = Die.create_pool(["d4", "d6", "d8", "d10"])
         self.tokens = {}
         self.actions = Action.get_basic_actions()
+
         super().__init__("placeholder_character.png", scale=.5, fps=4, z=-1, tileset_size=[4,4], animations={
         'idle' : ((0,3), (0,3)),        # makes an animation from (0,0) to (0,0), a single frame
         'walk_up' : ((0,0), (3,0)),     # makes an animation from (0,0) to (3,0), the bottom row
@@ -18,6 +19,7 @@ class Character(SpriteSheetAnimation):
         'walk_down' : ((0,3), (3,3)),
         })
         self.play_animation('walk_down')
+
         
     def get_tokens(self, tokenType: str) -> int:
         if tokenType in self.tokens:
@@ -56,7 +58,7 @@ class Character(SpriteSheetAnimation):
             action = self.actions[index]
             # these will have to adjust based on index in future when there are multiple
             action.x = window.top_left.x+.17
-            action.y = .3
+            action.y = .3 - .1125 * index
 
 
 # Basic actions

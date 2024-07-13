@@ -23,8 +23,6 @@ class Hex(Entity):
         scale = .125
         x_offset = (q + r/2) * scale
         y_offset = (r * .75) * scale
-        print("offsets:",x_offset, y_offset)
-        print(kwargs)
         super().__init__(parent=camera.ui,scale=scale,x=x_offset, y=y_offset, model='quad',collider='box', texture=load_texture("hexbordered.png"), kwargs=kwargs)
         self.on_click = self.clicked
         self.tooltip = Tooltip(str((q,r))+"::"+str(abs(q+r))+"::"+str(max(abs(q),abs(r))))

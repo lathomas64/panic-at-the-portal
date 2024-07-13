@@ -1,23 +1,18 @@
-from ursina import Button, window, color
+from ursina import Button, window, color, Tooltip
 from grid import Hex 
 from die import Die
 
 class Action(Button):
     basic_actions = []
     def __init__(self, cost, name, description, available, act):
-        super().__init__(scale=(.3,.1), x = window.top_left.x+.170, y=.3, text=str(self))
+        super().__init__(scale=(.3,.1), x = window.top_left.x+.170, y=3, text=str(self))
         self.on_click = lambda : Hex.current_character.take_action(self)
         self.cost = cost
         self.name = name 
         self.description = description 
         self.available = available 
         self.act = act
-
-    def available(self, pool=[], tokens={}) -> bool:
-        print("action available called.")
-        return False
-    def act(self, actor, die):
-        raise NotImplemented
+        self.tooltip = Tooltip(self.description)
     
     def update(self):
         self.text = self.cost + ": " + self.name
@@ -34,9 +29,6 @@ class Action(Button):
             self.color = color.gray
             pass
     
-    def __repr__(self):
-        return "Generic action - no one should see this"
-    
     @classmethod 
     def get_basic_actions(cls):
         if cls.basic_actions != []:
@@ -46,5 +38,19 @@ class Action(Button):
                "Gain X speed tokens", 
                lambda actor: actor.has_dice(),
                lambda actor, amount: actor.add_tokens("speed", amount))
-        cls.basic_actions = [move]
+        def unimplemented():
+            raise NotImplementedError("This action not yet implemented")
+        damage = Action("1+",
+                        "Damage",
+                        """
+                        Deal 1 damage to one enemy in your range
+                            3+: Deal 2 damage instead.
+                            5+: Deal 3 damage instead, and push them 1 space away.
+                            7+: Deal 4 damage instead, and push them 1 more space.
+                            9+: Deal 5 damage instead, and push them 1 more space.
+                        """,
+                        lambda actor: actor.has_dice(),
+                        lambda actor, die: unimplemented())
+        damage.y = 3
+        cls.basic_actions = [move, damage]
         return cls.basic_actions
