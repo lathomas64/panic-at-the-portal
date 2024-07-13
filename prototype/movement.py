@@ -8,6 +8,8 @@ if TYPE_CHECKING:
 class Movement(Action):
     def __init__(self):
         super(Movement, self).__init__()
+        self.name = "Movement"
+        self.cost = "X"
     
     def available(self, pool=[], tokens={}) -> bool:
         if len(pool) > 0:
@@ -17,7 +19,6 @@ class Movement(Action):
     
     def act(self, actor: 'Character', die:int):
         actor.add_tokens("speed", die)
-        actor.action_pool.remove(die)
     
     def __repr__(self):
         return "X: Gain X speed tokens"

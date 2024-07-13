@@ -1,6 +1,6 @@
 from ursina import *
 
-app = Ursina()
+
 
 class Hex(Entity):
     map = {}
@@ -35,12 +35,13 @@ class Hex(Entity):
     def update(self):
         if(self.hovered):
             self.color = Hex.hover_color
-            self.tooltip.text = str(self.distance(Hex.current_character.parent)) + " speed tokens"
+            if Hex.current_character != None:
+                self.tooltip.text = str(self.distance(Hex.current_character.parent)) + " speed tokens"
             self.tooltip.enabled = True
         else:
             self.color = Hex.base_color
             self.tooltip.enabled = False
-        if(self.distance(Hex.current_character.parent) <= 2):
+        if((Hex.current_character != None) and self.distance(Hex.current_character.parent) <= Hex.current_character.get_tokens("speed")):
             self.color = color.green
     def clicked(self):
         print("clicked:",self.q,self.r)
@@ -56,17 +57,19 @@ class Hex(Entity):
                     cls.map[(q,r)] = hex
         return cls.map
 
-my_map = Hex.create_map(4)
-player = SpriteSheetAnimation("placeholder_character.png", scale=.5, fps=4, z=-1, tileset_size=[4,4], animations={
-    'idle' : ((0,3), (0,3)),        # makes an animation from (0,0) to (0,0), a single frame
-    'walk_up' : ((0,0), (3,0)),     # makes an animation from (0,0) to (3,0), the bottom row
-    'walk_right' : ((0,1), (3,1)),
-    'walk_left' : ((0,2), (3,2)),
-    'walk_down' : ((0,3), (3,3)),
-    })
+if __name__ == "__main__":
+    app = Ursina()
+    my_map = Hex.create_map(4)
+    player = SpriteSheetAnimation("placeholder_character.png", scale=.5, fps=4, z=-1, tileset_size=[4,4], animations={
+        'idle' : ((0,3), (0,3)),        # makes an animation from (0,0) to (0,0), a single frame
+        'walk_up' : ((0,0), (3,0)),     # makes an animation from (0,0) to (3,0), the bottom row
+        'walk_right' : ((0,1), (3,1)),
+        'walk_left' : ((0,2), (3,2)),
+        'walk_down' : ((0,3), (3,3)),
+        })
 
-player.play_animation('walk_down')
-player.parent = Hex.map[(0,0)]
-Hex.current_character = player
+    player.play_animation('walk_down')
+    player.parent = Hex.map[(0,0)]
+    Hex.current_character = player
 
-app.run()
+    app.run()

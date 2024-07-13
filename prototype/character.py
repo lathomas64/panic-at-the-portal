@@ -1,40 +1,57 @@
 import random
 from action import Action
 from movement import Movement
+from die import Die
+from ursina import SpriteSheetAnimation, window
 
-class Character:
+class Character(SpriteSheetAnimation):
     # actions movement die in speed tokens out
 
     def __init__(self):
-        self.action_dice = ["d6","d6","d6","d6"]
-        self.action_pool = []
+        self.action_pool = Die.create_pool(["d4", "d6", "d8", "d10"])
         self.tokens = {}
         self.actions = [Movement()]
-    
+        super().__init__("placeholder_character.png", scale=.5, fps=4, z=-1, tileset_size=[4,4], animations={
+        'idle' : ((0,3), (0,3)),        # makes an animation from (0,0) to (0,0), a single frame
+        'walk_up' : ((0,0), (3,0)),     # makes an animation from (0,0) to (3,0), the bottom row
+        'walk_right' : ((0,1), (3,1)),
+        'walk_left' : ((0,2), (3,2)),
+        'walk_down' : ((0,3), (3,3)),
+        })
+        self.play_animation('walk_down')
+        
+    def get_tokens(self, tokenType: str) -> int:
+        if tokenType in self.tokens:
+            return self.tokens[tokenType]
+        else:
+            return 0
+
     def add_tokens(self, tokenType: str, tokenAmount:int):
         if tokenType in self.tokens:
             self.tokens[tokenType] += tokenAmount 
         else:
             self.tokens[tokenType] = tokenAmount
 
-    def roll_die(self, die) -> int:
-        if type(die) == int:
-            return die 
-        elif type(die) == str: #die represented as d4, d6, d8, or d10 this drops the d and gets the number
-            size = int(die.split("d").pop())
-            result = random.randint(1,size)
-            return result
+    def take_action(self, action: Action): #this only works for actions that take die
+        action.act(self, Die.selected.value)
+        #self.action_pool.remove(Die.selected)
+        Die.selected.consume()
 
     def start_turn(self):
         # anything else at start of turn
-        self.action_pool = []
-        for die in self.action_dice:
-            self.action_pool.append(self.roll_die(die))
+        for die in self.action_pool:
+            die.roll()
+        for index in range(len(self.actions)):
+            action = self.actions[index]
+            # these will have to adjust based on index in future when there are multiple
+            action.x = window.top_left.x+.17
+            action.y = .3
+
 
 # Basic actions
 
 
-if __name__ == "__main__":
+if __name__ == "__main__": # this example is probably broken and needs to be rewritten
     oc = Character()
     oc.start_turn()
     while True:
