@@ -7,6 +7,7 @@ class Hex(Entity):
     current_character = None
     base_color = color.white 
     hover_color = color.gray
+    move_cost = -1
     directions = {
         "northeast":(0,1),
         "east" : (1,0),
@@ -33,20 +34,28 @@ class Hex(Entity):
         r = self.r - otherHex.r
         return max([abs(q+r), abs(q), abs(r)])
     def update(self):
+        if Hex.current_character != None:
+            self.move_cost = self.distance(Hex.current_character.parent)
+        else:
+            self.move_cost = -1
         if(self.hovered):
             self.color = Hex.hover_color
             if Hex.current_character != None:
-                self.tooltip.text = str(self.distance(Hex.current_character.parent)) + " speed tokens"
+                self.tooltip.text = str(self.move_cost) + " speed tokens"
             self.tooltip.enabled = True
         else:
             self.color = Hex.base_color
             self.tooltip.enabled = False
-        if((Hex.current_character != None) and self.distance(Hex.current_character.parent) <= Hex.current_character.get_tokens("speed")):
+        if((Hex.current_character != None) 
+           and self.move_cost > 0
+           and self.move_cost <= Hex.current_character.get_tokens("speed")):
             self.color = color.green
     def clicked(self):
         print("clicked:",self.q,self.r)
-        Hex.hover_color = color.random_color()
-        Hex.current_character.parent = self
+        if((Hex.current_character != None) and self.move_cost <= Hex.current_character.get_tokens("speed")):
+            cost = self.distance(Hex.current_character.parent)
+            Hex.current_character.parent = self
+            Hex.current_character.spend_tokens("speed", cost)
     @classmethod
     def create_map(cls, radius):
         cls.map = {}

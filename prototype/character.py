@@ -1,6 +1,5 @@
 import random
 from action import Action
-from movement import Movement
 from die import Die
 from ursina import SpriteSheetAnimation, window
 
@@ -10,7 +9,7 @@ class Character(SpriteSheetAnimation):
     def __init__(self):
         self.action_pool = Die.create_pool(["d4", "d6", "d8", "d10"])
         self.tokens = {}
-        self.actions = [Movement()]
+        self.actions = Action.get_basic_actions()
         super().__init__("placeholder_character.png", scale=.5, fps=4, z=-1, tileset_size=[4,4], animations={
         'idle' : ((0,3), (0,3)),        # makes an animation from (0,0) to (0,0), a single frame
         'walk_up' : ((0,0), (3,0)),     # makes an animation from (0,0) to (3,0), the bottom row
@@ -31,6 +30,18 @@ class Character(SpriteSheetAnimation):
             self.tokens[tokenType] += tokenAmount 
         else:
             self.tokens[tokenType] = tokenAmount
+    
+    def spend_tokens(self, tokenType: str, tokenAmount:int):
+        self.tokens[tokenType] -= tokenAmount
+        if self.tokens[tokenType] < 0:
+            self.tokens[tokenType] = 0
+    
+    def has_dice(self):
+        for die in self.action_pool:
+            if die.used == False:
+                return True
+        # no unused dice here
+        return False
 
     def take_action(self, action: Action): #this only works for actions that take die
         action.act(self, Die.selected.value)
