@@ -16,7 +16,7 @@ class Action(Button):
     
     def update(self):
         self.text = self.cost + ": " + self.name
-        if (Die.selected != None) and self.available(Hex.current_character):
+        if self.available(Hex.current_character):
             #self.enabled = True 
             self.disabled = False
             self.on_click = self.on_click = lambda : Hex.current_character.take_action(self)
@@ -36,7 +36,7 @@ class Action(Button):
         move = Action("X", 
                "Movement", 
                "Gain X speed tokens", 
-               lambda actor: actor.has_dice(),
+               lambda actor: actor.has_dice() and Die.selected != None,
                lambda actor, amount: actor.add_tokens("speed", amount))
         def unimplemented():
             raise NotImplementedError("This action not yet implemented")
@@ -49,8 +49,13 @@ class Action(Button):
                             7+: Deal 4 damage instead, and push them 1 more space.
                             9+: Deal 5 damage instead, and push them 1 more space.
                         """,
-                        lambda actor: actor.has_dice(),
+                        lambda actor: actor.has_dice() and Die.selected != None,
                         lambda actor, die: unimplemented())
-        damage.y = 3
-        cls.basic_actions = [move, damage]
+        #TODO once we have a turn queue this should go to the next player's turn
+        end = Action("",
+                     "End Turn",
+                     "End your turn",
+                     lambda actor: True,
+                     lambda actor, die: actor.start_turn())
+        cls.basic_actions = [move, damage, end]
         return cls.basic_actions

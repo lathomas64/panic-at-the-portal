@@ -6,12 +6,12 @@ from ursina import SpriteSheetAnimation, window
 class Character(SpriteSheetAnimation):
     # actions movement die in speed tokens out
 
-    def __init__(self):
+    def __init__(self, sheet="placeholder_character.png"):
         self.action_pool = Die.create_pool(["d4", "d6", "d8", "d10"])
         self.tokens = {}
         self.actions = Action.get_basic_actions()
 
-        super().__init__("placeholder_character.png", scale=.5, fps=4, z=-1, tileset_size=[4,4], animations={
+        super().__init__(sheet, scale=.5, fps=4, z=-1, tileset_size=[4,4], animations={
         'idle' : ((0,3), (0,3)),        # makes an animation from (0,0) to (0,0), a single frame
         'walk_up' : ((0,0), (3,0)),     # makes an animation from (0,0) to (3,0), the bottom row
         'walk_right' : ((0,1), (3,1)),
@@ -34,6 +34,8 @@ class Character(SpriteSheetAnimation):
             self.tokens[tokenType] = tokenAmount
     
     def spend_tokens(self, tokenType: str, tokenAmount:int):
+        if tokenType not in self.tokens:
+            return
         self.tokens[tokenType] -= tokenAmount
         if self.tokens[tokenType] < 0:
             self.tokens[tokenType] = 0
@@ -46,9 +48,11 @@ class Character(SpriteSheetAnimation):
         return False
 
     def take_action(self, action: Action): #this only works for actions that take die
-        action.act(self, Die.selected.value)
-        #self.action_pool.remove(Die.selected)
-        Die.selected.consume()
+        if Die.selected:
+            action.act(self, Die.selected.value)
+            Die.selected.consume()
+        else:
+            action.act(self, None) #this will get more complicated later with token actions
 
     def start_turn(self):
         # anything else at start of turn
@@ -59,6 +63,9 @@ class Character(SpriteSheetAnimation):
             # these will have to adjust based on index in future when there are multiple
             action.x = window.top_left.x+.17
             action.y = .3 - .1125 * index
+    
+    def end_turn(self):
+        self.tokens["speed"] = 0 # unless special conditions
 
 
 # Basic actions

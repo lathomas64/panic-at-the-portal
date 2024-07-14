@@ -27,10 +27,24 @@ class Hex(Entity):
         self.on_click = self.clicked
         self.tooltip = Tooltip(str((q,r))+"::"+str(abs(q+r))+"::"+str(max(abs(q),abs(r))))
 
+    def empty(self):
+        return len(self.children) == 0
+
     def distance(self, otherHex):
         q = self.q - otherHex.q
         r = self.r - otherHex.r
         return max([abs(q+r), abs(q), abs(r)])
+    
+    def neighbors(self):
+        result = []
+        for q in range(self.q-1,self.q+2):
+            for r in range(self.r-1,self.r+2):
+                if (q,r) == (self.q,self.r):
+                    continue # don't count myself as a neighbor
+                if (q,r) in Hex.map and abs(q-self.q+r-self.r) <= 1:
+                    result.append(Hex.map[(q,r)])
+        return result
+    
     def update(self):
         if Hex.current_character != None:
             self.move_cost = self.distance(Hex.current_character.parent)
@@ -48,12 +62,14 @@ class Hex(Entity):
            and self.move_cost > 0
            and self.move_cost <= Hex.current_character.get_tokens("speed")):
             self.color = color.green
+    
     def clicked(self):
         print("clicked:",self.q,self.r)
-        if((Hex.current_character != None) and self.move_cost <= Hex.current_character.get_tokens("speed")):
+        if(self.empty() and (Hex.current_character != None) and self.move_cost <= Hex.current_character.get_tokens("speed")):
             cost = self.distance(Hex.current_character.parent)
             Hex.current_character.parent = self
             Hex.current_character.spend_tokens("speed", cost)
+
     @classmethod
     def create_map(cls, radius):
         cls.map = {}
