@@ -1,6 +1,7 @@
 import random
 from action import Action
 from die import Die
+from grid import Hex
 from ursina import SpriteSheetAnimation, window
 
 class Character(SpriteSheetAnimation):
@@ -10,6 +11,8 @@ class Character(SpriteSheetAnimation):
         self.action_pool = Die.create_pool(["d4", "d6", "d8", "d10"])
         self.tokens = {}
         self.actions = Action.get_basic_actions()
+        self.max_health = 6
+        self.health = self.max_health
 
         super().__init__(sheet, scale=.5, fps=4, z=-1, tileset_size=[4,4], animations={
         'idle' : ((0,3), (0,3)),        # makes an animation from (0,0) to (0,0), a single frame
@@ -20,6 +23,34 @@ class Character(SpriteSheetAnimation):
         })
         self.play_animation('walk_down')
 
+    def take_damage(self, amount):
+        self.health -= amount 
+        print(self.health,"/",self.max_health)
+    
+    def heal(self, amount):
+        self.health += amount
+        print(self.health,"/",self.max_health)
+    
+    def push(self, target, amount):
+        qdiff = target.parent.q - self.parent.q 
+        rdiff = target.parent.r - self.parent.r
+        print(qdiff)
+        print(rdiff)
+        destination_coords = (target.parent.q, target.parent.r)
+        if abs(qdiff) > abs(rdiff):
+            #push q            
+            if qdiff > 0:
+                destination_coords = (target.parent.q+amount, target.parent.r) 
+            else:
+                destination_coords = (target.parent.q-amount, target.parent.r) 
+        else:
+            #push r
+            if rdiff > 0:
+                destination_coords = (target.parent.q, target.parent.r+amount)
+            else:
+                destination_coords = (target.parent.q, target.parent.r-amount)
+        print("attempting to push ",target, " ", amount, " hexes")
+        target.parent = Hex.map[destination_coords]
         
     def get_tokens(self, tokenType: str) -> int:
         if tokenType in self.tokens:

@@ -4,6 +4,7 @@ from ursina import *
 
 class Hex(Entity):
     map = {}
+    targeting = None
     current_character = None
     base_color = color.white 
     hover_color = color.gray
@@ -20,6 +21,7 @@ class Hex(Entity):
     def __init__(self, q,r, **kwargs):
         self.q = q
         self.r = r
+        self.s = -1 * (q+r)
         scale = .125
         x_offset = (q + r/2) * scale
         y_offset = (r * .75) * scale
@@ -64,6 +66,9 @@ class Hex(Entity):
             self.color = color.green
     
     def clicked(self):
+        if Hex.targeting != None:
+            Hex.targeting["action"](Hex.targeting["actor"],Hex.targeting["die"], self)
+            return
         print("clicked:",self.q,self.r)
         if(self.empty() and (Hex.current_character != None) and self.move_cost <= Hex.current_character.get_tokens("speed")):
             cost = self.distance(Hex.current_character.parent)

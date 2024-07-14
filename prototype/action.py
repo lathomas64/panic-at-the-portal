@@ -38,8 +38,33 @@ class Action(Button):
                "Gain X speed tokens", 
                lambda actor: actor.has_dice() and Die.selected != None,
                lambda actor, amount: actor.add_tokens("speed", amount))
-        def unimplemented():
-            raise NotImplementedError("This action not yet implemented")
+        def do_damage(actor, die, targetHex):
+            print(actor, die, targetHex)
+            print(targetHex.children)
+            target = targetHex.children[0]
+            print("deal damage to ",target)
+            if die >= 9:
+                print("deal 5 damage, and push them 3 spaces")
+                target.take_damage(5)
+                actor.push(target, 3)
+            elif die >= 7:
+                print("Deal 4 damage, and push them 2 spaces.")
+                target.take_damage(4)
+                actor.push(target, 2)
+            elif die >= 5:
+                print("Deal 3 damage, and push them 1 space away")
+                target.take_damage(3)
+                actor.push(target, 1)
+            elif die >= 3:
+                print("Deal 2 damage")
+                target.take_damage(2)
+            else:
+                print("Deal 1 damage")
+                target.take_damage(1)
+            Hex.targeting = None
+        def basic_damage(actor, die):
+            print(actor, " trying to use damage action with ",die)
+            Hex.targeting = {"actor":actor, "action":do_damage, "die":die}
         damage = Action("1+",
                         "Damage",
                         """
@@ -50,7 +75,7 @@ class Action(Button):
                             9+: Deal 5 damage instead, and push them 1 more space.
                         """,
                         lambda actor: actor.has_dice() and Die.selected != None,
-                        lambda actor, die: unimplemented())
+                        basic_damage)
         #TODO once we have a turn queue this should go to the next player's turn
         end = Action("",
                      "End Turn",
