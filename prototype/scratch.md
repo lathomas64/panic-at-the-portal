@@ -23,3 +23,5 @@ action pool, actions, tokens, position.
 
 ---
 placing character at hex coordinates gives offset further away from center.
+
+pull, obstacles, challenge tokens, 

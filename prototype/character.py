@@ -51,7 +51,10 @@ class Character(SpriteSheetAnimation):
                 destination_coords = (target.parent.q, target.parent.r-amount)
         print("attempting to push ",target, " ", amount, " hexes")
         target.parent = Hex.map[destination_coords]
-        
+
+    def pull(self, target, amount):
+        self.push(target, -1 * amount)
+
     def get_tokens(self, tokenType: str) -> int:
         if tokenType in self.tokens:
             return self.tokens[tokenType]

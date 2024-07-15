@@ -88,11 +88,24 @@ class Action(Button):
                        lambda actor: actor.has_dice() and Die.selected != None,
                        basic_throw
                        )
+        
+        def do_grapple(actor, die, targetHex):
+            target = targetHex.children[0]
+            actor.pull(target, die)
+            Hex.targeting = None
+        def basic_grapple(actor, die):
+            Hex.targeting = {"actor": actor, "action": do_grapple, "die": die}
+        grapple = Action("X",
+                       "Grapple",
+                       "Choose an enemy or ally within range, and pull them X spaces towards you.",
+                       lambda actor: actor.has_dice() and Die.selected != None,
+                       basic_grapple
+                       )
         #TODO once we have a turn queue this should go to the next player's turn
         end = Action("",
                      "End Turn",
                      "End your turn",
                      lambda actor: True,
                      lambda actor, die: actor.start_turn())
-        cls.basic_actions = [move, damage, throw, end]
+        cls.basic_actions = [move, damage, throw, grapple, end]
         return cls.basic_actions
