@@ -76,11 +76,23 @@ class Action(Button):
                         """,
                         lambda actor: actor.has_dice() and Die.selected != None,
                         basic_damage)
+        def do_throw(actor, die, targetHex):
+            target = targetHex.children[0]
+            actor.push(target, die)
+            Hex.targeting = None
+        def basic_throw(actor, die):
+            Hex.targeting = {"actor": actor, "action": do_throw, "die": die}
+        throw = Action("X",
+                       "Throw",
+                       "Choose an adjacent enemy or ally, and push them X spaces.",
+                       lambda actor: actor.has_dice() and Die.selected != None,
+                       basic_throw
+                       )
         #TODO once we have a turn queue this should go to the next player's turn
         end = Action("",
                      "End Turn",
                      "End your turn",
                      lambda actor: True,
                      lambda actor, die: actor.start_turn())
-        cls.basic_actions = [move, damage, end]
+        cls.basic_actions = [move, damage, throw, end]
         return cls.basic_actions
