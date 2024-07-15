@@ -24,7 +24,10 @@ class Character(SpriteSheetAnimation):
         self.play_animation('walk_down')
 
     def take_damage(self, amount):
-        self.health -= amount 
+        self.health -= amount
+        if self.health <= 0:
+            self.parent = None
+            self.visible = False
         print(self.health,"/",self.max_health)
     
     def heal(self, amount):
@@ -112,6 +115,9 @@ class Character(SpriteSheetAnimation):
     
     def end_turn(self):
         self.tokens["speed"] = 0 # unless special conditions
+    
+    def __del__(self):
+        print("character deleted...")
 
 
 # Basic actions
