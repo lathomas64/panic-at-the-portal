@@ -1,8 +1,8 @@
-import random
 from action import Action
 from die import Die
 from grid import Hex
-from ursina import SpriteSheetAnimation, window
+from fadingText import FadingText
+from ursina import SpriteSheetAnimation, window, color
 
 class Character(SpriteSheetAnimation):
     # actions movement die in speed tokens out
@@ -25,13 +25,15 @@ class Character(SpriteSheetAnimation):
 
     def take_damage(self, amount):
         self.health -= amount
+        FadingText(amount, self, color.red)
         if self.health <= 0:
             self.parent = None
-            self.visible = False
+            self.enabled = False
         print(self.health,"/",self.max_health)
     
     def heal(self, amount):
         self.health += amount
+        FadingText(amount, self, color.green)
         print(self.health,"/",self.max_health)
     
     def push(self, target, amount):   
