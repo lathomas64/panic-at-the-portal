@@ -31,26 +31,38 @@ class Character(SpriteSheetAnimation):
         self.health += amount
         print(self.health,"/",self.max_health)
     
-    def push(self, target, amount):
-        qdiff = target.parent.q - self.parent.q 
-        rdiff = target.parent.r - self.parent.r
-        print(qdiff)
-        print(rdiff)
-        destination_coords = (target.parent.q, target.parent.r)
-        if abs(qdiff) > abs(rdiff):
-            #push q            
-            if qdiff > 0:
-                destination_coords = (target.parent.q+amount, target.parent.r) 
+    def push(self, target, amount):   
+        for _ in range(min(amount,0), max(amount,0)):
+            qdiff = target.parent.q - self.parent.q 
+            rdiff = target.parent.r - self.parent.r
+            if amount < 0:
+                qdiff = qdiff * -1
+                rdiff = rdiff * -1
+            destination_q = target.parent.q
+            destination_r = target.parent.r
+            if (abs(qdiff) == abs(rdiff)) and (qdiff != rdiff):
+                if qdiff > 0:
+                    destination_q += 1
+                else:
+                    destination_q -= 1
+                if rdiff > 0:
+                    destination_r += 1
+                else:
+                    destination_r -= 1
+            elif abs(qdiff) > abs(rdiff):
+                #push q            
+                if qdiff > 0:
+                    destination_q += 1
+                else:
+                    destination_q -= 1 
             else:
-                destination_coords = (target.parent.q-amount, target.parent.r) 
-        else:
-            #push r
-            if rdiff > 0:
-                destination_coords = (target.parent.q, target.parent.r+amount)
-            else:
-                destination_coords = (target.parent.q, target.parent.r-amount)
-        print("attempting to push ",target, " ", amount, " hexes")
-        target.parent = Hex.map[destination_coords]
+                #push r
+                if rdiff > 0:
+                    destination_r += 1
+                else:
+                    destination_r -= 1
+            print("attempting to push ",target, " ", amount, " hexes")
+            target.parent = Hex.map[destination_q, destination_r]
 
     def pull(self, target, amount):
         self.push(target, -1 * amount)
