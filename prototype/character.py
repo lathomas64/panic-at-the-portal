@@ -9,7 +9,6 @@ class Character(SpriteSheetAnimation):
     # actions movement die in speed tokens out
 
     def __init__(self, sheet="placeholder_character.png", name="default name"):
-        self.name = name
         self.range = 1
         self.action_pool = Die.create_pool(["d4", "d6", "d8", "d10"])
         self.tokens = {}
@@ -24,6 +23,7 @@ class Character(SpriteSheetAnimation):
         'walk_left' : ((0,2), (3,2)),
         'walk_down' : ((0,3), (3,3)),
         })
+        self.name = name
         self.play_animation('walk_down')
         #self.health_bar = HealthBar(parent=self, x=.5,bar_color=color.lime.tint(-.25), roundness=.5, max_value=self.max_health, value=self.health)
 
@@ -139,7 +139,7 @@ class Character(SpriteSheetAnimation):
     def __del__(self):
         print("character deleted...")
     def __str__(self):
-        return str(self.health) + "/" + str(self.max_health)
+        return self.name + "\n" + str(self.health) + "/" + str(self.max_health)
 
 
 # Basic actions
