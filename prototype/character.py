@@ -82,7 +82,6 @@ class Character(SpriteSheetAnimation):
         self.push(target, -1 * amount)
 
     def get_tokens(self, tokenType: str) -> int:
-        print(self.tokens)
         if tokenType in self.tokens:
             return self.tokens[tokenType]
         else:

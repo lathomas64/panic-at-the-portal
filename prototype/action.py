@@ -1,6 +1,7 @@
 from ursina import Button, window, color, Tooltip
 from grid import Hex 
 from die import Die
+from fadingText import FadingText
 
 class Action(Button):
     basic_actions = []
@@ -42,6 +43,12 @@ class Action(Button):
         def do_damage(actor, die, targetHex):
             print(actor, die, targetHex)
             print(targetHex.children)
+            if len(targetHex.children) == 0:
+                FadingText("No valid target", targetHex, color.red)
+                return
+            if actor.parent.distance(targetHex) > actor.range:
+                FadingText("out of range", targetHex, color.red)
+                return
             target = targetHex.children[0]
             print("deal damage to ",target)
             if die >= 9:
