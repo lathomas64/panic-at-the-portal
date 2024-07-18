@@ -55,7 +55,9 @@ class Hex(Entity):
             self.move_cost = -1
         if(self.hovered):
             self.color = Hex.hover_color
-            if Hex.current_character != None:
+            if self.children != []:
+                self.tooltip.text = str(self.children[0])
+            elif Hex.current_character != None:
                 self.tooltip.text = str(self.move_cost) + " speed tokens"
             self.tooltip.enabled = True
         else:

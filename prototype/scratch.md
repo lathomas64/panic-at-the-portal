@@ -24,4 +24,6 @@ action pool, actions, tokens, position.
 ---
 placing character at hex coordinates gives offset further away from center.
 
-pull, obstacles, challenge tokens, 
+obstacles, challenge tokens, 
+https://www.redblobgames.com/grids/hexagons/
+https://writeups.letsyouandhimfight.com/professorprof/panic-at-the-dojo/

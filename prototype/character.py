@@ -3,6 +3,7 @@ from die import Die
 from grid import Hex
 from fadingText import FadingText
 from ursina import SpriteSheetAnimation, window, color
+#from ursina.prefabs.health_bar import HealthBar
 
 class Character(SpriteSheetAnimation):
     # actions movement die in speed tokens out
@@ -24,9 +25,11 @@ class Character(SpriteSheetAnimation):
         'walk_down' : ((0,3), (3,3)),
         })
         self.play_animation('walk_down')
+        #self.health_bar = HealthBar(parent=self, x=.5,bar_color=color.lime.tint(-.25), roundness=.5, max_value=self.max_health, value=self.health)
 
     def take_damage(self, amount):
         self.health -= amount
+        #self.health_bar.value = self.health
         FadingText(amount, self, color.red)
         if self.health <= 0:
             self.parent = None
@@ -35,10 +38,12 @@ class Character(SpriteSheetAnimation):
     
     def heal(self, amount):
         self.health += amount
+        #self.health_bar.value = self.health
         FadingText(amount, self, color.green)
         print(self.health,"/",self.max_health)
     
-    def push(self, target, amount):   
+    def push(self, target, amount):
+        print("attempting to push ",target, " ", amount, " hexes")   
         for _ in range(min(amount,0), max(amount,0)):
             qdiff = target.parent.q - self.parent.q 
             rdiff = target.parent.r - self.parent.r
@@ -68,8 +73,10 @@ class Character(SpriteSheetAnimation):
                     destination_r += 1
                 else:
                     destination_r -= 1
-            print("attempting to push ",target, " ", amount, " hexes")
-            target.parent = Hex.map[destination_q, destination_r]
+            if (destination_q, destination_r) in Hex.map:
+                target.parent = Hex.map[destination_q, destination_r]
+            #should we have an else?
+        #TODO handle ringout if their final destination is outside the map.
 
     def pull(self, target, amount):
         self.push(target, -1 * amount)
@@ -82,13 +89,14 @@ class Character(SpriteSheetAnimation):
             return 0
 
     def add_tokens(self, tokenType: str, tokenAmount:int):
-        print(self.tokens, tokenType, tokenAmount)
+        FadingText("+"+str(tokenAmount) + " " + tokenType, self, color.green)
         if tokenType in self.tokens:
             self.tokens[tokenType] += tokenAmount 
         else:
             self.tokens[tokenType] = tokenAmount
     
     def spend_tokens(self, tokenType: str, tokenAmount:int):
+        FadingText("-"+str(tokenAmount) + " " + tokenType, self, color.red)
         if tokenType not in self.tokens:
             return
         self.tokens[tokenType] -= tokenAmount
@@ -131,6 +139,8 @@ class Character(SpriteSheetAnimation):
     
     def __del__(self):
         print("character deleted...")
+    def __str__(self):
+        return str(self.health) + "/" + str(self.max_health)
 
 
 # Basic actions
