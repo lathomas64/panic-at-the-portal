@@ -11,6 +11,7 @@ class Die(Entity):
         self.text = Text(text="", parent=self, color=color.white, z=-1, scale=10)
         self.text.x = -1 * (self.text.scale.x * self.text.width) / 2
         self.on_click = self.clicked
+        self.enabled = False
     
     def update(self):
         if self.used:

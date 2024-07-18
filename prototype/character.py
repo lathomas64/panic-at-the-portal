@@ -7,7 +7,9 @@ from ursina import SpriteSheetAnimation, window, color
 class Character(SpriteSheetAnimation):
     # actions movement die in speed tokens out
 
-    def __init__(self, sheet="placeholder_character.png"):
+    def __init__(self, sheet="placeholder_character.png", name="default name"):
+        self.name = name
+        self.range = 1
         self.action_pool = Die.create_pool(["d4", "d6", "d8", "d10"])
         self.tokens = {}
         self.actions = Action.get_basic_actions()
@@ -73,12 +75,14 @@ class Character(SpriteSheetAnimation):
         self.push(target, -1 * amount)
 
     def get_tokens(self, tokenType: str) -> int:
+        print(self.tokens)
         if tokenType in self.tokens:
             return self.tokens[tokenType]
         else:
             return 0
 
     def add_tokens(self, tokenType: str, tokenAmount:int):
+        print(self.tokens, tokenType, tokenAmount)
         if tokenType in self.tokens:
             self.tokens[tokenType] += tokenAmount 
         else:
@@ -100,8 +104,8 @@ class Character(SpriteSheetAnimation):
 
     def take_action(self, action: Action): #this only works for actions that take die
         if Die.selected:
-            action.act(self, Die.selected.value)
-            Die.selected.consume()
+            if action.act(self, Die.selected.value) != False:
+                Die.selected.consume()
         else:
             action.act(self, None) #this will get more complicated later with token actions
 
@@ -109,14 +113,21 @@ class Character(SpriteSheetAnimation):
         # anything else at start of turn
         for die in self.action_pool:
             die.roll()
+            die.enabled = True
         for index in range(len(self.actions)):
             action = self.actions[index]
             # these will have to adjust based on index in future when there are multiple
             action.x = window.top_left.x+.17
             action.y = .3 - .1125 * index
+            action.enabled = True
     
     def end_turn(self):
         self.tokens["speed"] = 0 # unless special conditions
+        for die in self.action_pool:
+            die.enabled = False 
+        for action in self.actions:
+            action.enabled = False 
+        Hex.advance_turn()
     
     def __del__(self):
         print("character deleted...")

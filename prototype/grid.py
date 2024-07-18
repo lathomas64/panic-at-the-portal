@@ -6,6 +6,7 @@ class Hex(Entity):
     map = {}
     targeting = None
     current_character = None
+    turns = []
     base_color = color.white 
     hover_color = color.gray
     move_cost = -1
@@ -84,6 +85,16 @@ class Hex(Entity):
                     hex = Hex(q,r)
                     cls.map[(q,r)] = hex
         return cls.map
+    
+    @classmethod
+    def advance_turn(cls):
+        if cls.current_character != None: #skip this if we haven't done a turn yet
+            cls.turns.remove(cls.current_character)
+            cls.turns.append(cls.current_character)
+        cls.current_character = cls.turns[0]
+        cls.current_character.start_turn()
+
+
 
 if __name__ == "__main__":
     app = Ursina()

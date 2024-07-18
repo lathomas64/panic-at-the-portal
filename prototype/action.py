@@ -13,6 +13,7 @@ class Action(Button):
         self.available = available 
         self.act = act
         self.tooltip = Tooltip(self.description)
+        self.enabled = False
     
     def update(self):
         self.text = self.cost + ": " + self.name
@@ -106,6 +107,6 @@ class Action(Button):
                      "End Turn",
                      "End your turn",
                      lambda actor: True,
-                     lambda actor, die: actor.start_turn())
+                     lambda actor, die: actor.end_turn())
         cls.basic_actions = [move, damage, throw, grapple, end]
         return cls.basic_actions
