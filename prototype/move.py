@@ -5,7 +5,7 @@ from character import Character
 
 if __name__ == "__main__":
     app = Ursina()
-    Hex.create_map(3)
+    Hex.create_map(10)
     player = Character(name="player")
     player.parent = Hex.map[(0,0)]
     dummy = Character("faceless_character.png", "dummy")

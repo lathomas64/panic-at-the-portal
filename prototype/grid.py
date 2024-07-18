@@ -1,9 +1,36 @@
 from ursina import *
 
+class Map(Entity):
+    hexes = {}
+    pan_speed = 5
+    zoom_speed = 10
+    def __init__(self, **kwargs):
+        super().__init__(parent=camera.ui, kwargs=kwargs)
+    
+    def __setitem__(self, key, value):
+        self.hexes[key] = value
 
+    def __getitem__(self, key):
+        return self.hexes[key]
+
+
+    def input(self, key):
+        print(key)
+        if key == "a" or key == "a hold":
+            self.x += self.pan_speed * time.dt
+        if key == "d" or key == "d hold":
+            self.x -= self.pan_speed * time.dt
+        if key == "w" or key == "w hold":
+            self.y -= self.pan_speed * time.dt
+        if key == "s" or key == "s hold":
+            self.y += self.pan_speed * time.dt
+        if key == "scroll up":
+            self.z += self.zoom_speed * time.dt
+        if key == "scroll down":
+            self.z -= self.zoom_speed * time.dt
 
 class Hex(Entity):
-    map = {}
+    map = Map(parent=camera.ui)
     targeting = None
     current_character = None
     turns = []
@@ -23,10 +50,10 @@ class Hex(Entity):
         self.q = q
         self.r = r
         self.s = -1 * (q+r)
-        scale = .125
+        scale = 1
         x_offset = (q + r/2) * scale
         y_offset = (r * .75) * scale
-        super().__init__(parent=camera.ui,scale=scale,x=x_offset, y=y_offset, model='quad',collider='box', texture=load_texture("hexbordered.png"), kwargs=kwargs)
+        super().__init__(parent=Hex.map,scale=scale,x=x_offset, y=y_offset, model='quad',collider='box', texture=load_texture("hexbordered.png"), kwargs=kwargs)
         self.on_click = self.clicked
         self.tooltip = Tooltip(str((q,r))+"::"+str(abs(q+r))+"::"+str(max(abs(q),abs(r))))
 
@@ -47,7 +74,7 @@ class Hex(Entity):
                 if (q,r) in Hex.map and abs(q-self.q+r-self.r) <= 1:
                     result.append(Hex.map[(q,r)])
         return result
-    
+
     def update(self):
         if Hex.current_character != None:
             self.move_cost = self.distance(Hex.current_character.parent)
@@ -80,7 +107,6 @@ class Hex(Entity):
 
     @classmethod
     def create_map(cls, radius):
-        cls.map = {}
         for q in range(-radius, radius+1):
             for r in range(-radius, radius+1):
                 if abs(q+r) <=radius:
