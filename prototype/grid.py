@@ -12,6 +12,8 @@ class Map(Entity):
 
     def __getitem__(self, key):
         return self.hexes[key]
+    def __contains__(self, key):
+        return key in self.hexes
 
 
     def input(self, key):

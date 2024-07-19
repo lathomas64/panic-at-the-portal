@@ -50,6 +50,9 @@ class Action(Button):
                 FadingText("out of range", targetHex, color.red)
                 return
             target = targetHex.children[0]
+            if type(target) == FadingText:
+                print("we can't attack fading text...")
+                return
             print("deal damage to ",target)
             if die >= 9:
                 print("deal 5 damage, and push them 3 spaces")
