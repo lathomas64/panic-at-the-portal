@@ -4,6 +4,8 @@ class Map(Entity):
     hexes = {}
     pan_speed = 5
     zoom_speed = 1
+    max_zoom = .5
+    min_zoom = .05
     def __init__(self, **kwargs):
         super().__init__(parent=camera.ui,scale=.1, z=100,kwargs=kwargs)
     
@@ -17,8 +19,6 @@ class Map(Entity):
 
 
     def input(self, key):
-        print(key)
-        print(self.x,self.y,self.scale)
         if key == "a" or key == "a hold":
             self.x += self.pan_speed * time.dt
         if key == "d" or key == "d hold":
@@ -29,8 +29,10 @@ class Map(Entity):
             self.y += self.pan_speed * time.dt
         if key == "scroll up":
             self.scale += Vec3(self.zoom_speed * time.dt)
+            self.scale = min(self.scale, self.max_zoom)
         if key == "scroll down":
             self.scale -= Vec3(self.zoom_speed * time.dt)
+            self.scale = max(self.scale, self.min_zoom)
 
 class Hex(Entity):
     map = None
