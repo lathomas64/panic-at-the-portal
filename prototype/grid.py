@@ -3,9 +3,9 @@ from ursina import *
 class Map(Entity):
     hexes = {}
     pan_speed = 5
-    zoom_speed = 10
+    zoom_speed = 1
     def __init__(self, **kwargs):
-        super().__init__(parent=camera.ui, kwargs=kwargs)
+        super().__init__(parent=camera.ui,scale=.1, z=100,kwargs=kwargs)
     
     def __setitem__(self, key, value):
         self.hexes[key] = value
@@ -18,6 +18,7 @@ class Map(Entity):
 
     def input(self, key):
         print(key)
+        print(self.x,self.y,self.scale)
         if key == "a" or key == "a hold":
             self.x += self.pan_speed * time.dt
         if key == "d" or key == "d hold":
@@ -27,12 +28,12 @@ class Map(Entity):
         if key == "s" or key == "s hold":
             self.y += self.pan_speed * time.dt
         if key == "scroll up":
-            self.z += self.zoom_speed * time.dt
+            self.scale += Vec3(self.zoom_speed * time.dt)
         if key == "scroll down":
-            self.z -= self.zoom_speed * time.dt
+            self.scale -= Vec3(self.zoom_speed * time.dt)
 
 class Hex(Entity):
-    map = Map(parent=camera.ui)
+    map = None
     targeting = None
     current_character = None
     turns = []
@@ -109,6 +110,7 @@ class Hex(Entity):
 
     @classmethod
     def create_map(cls, radius):
+        cls.map = Map(parent=camera.ui)
         for q in range(-radius, radius+1):
             for r in range(-radius, radius+1):
                 if abs(q+r) <=radius:
