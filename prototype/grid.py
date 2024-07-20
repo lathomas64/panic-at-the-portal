@@ -1,9 +1,41 @@
 from ursina import *
 
+class Map(Entity):
+    hexes = {}
+    pan_speed = 5
+    zoom_speed = 1
+    max_zoom = .5
+    min_zoom = .05
+    def __init__(self, **kwargs):
+        super().__init__(parent=camera.ui,scale=.1, z=100,kwargs=kwargs)
+    
+    def __setitem__(self, key, value):
+        self.hexes[key] = value
 
+    def __getitem__(self, key):
+        return self.hexes[key]
+    def __contains__(self, key):
+        return key in self.hexes
+
+
+    def input(self, key):
+        if key == "a" or key == "a hold":
+            self.x += self.pan_speed * time.dt
+        if key == "d" or key == "d hold":
+            self.x -= self.pan_speed * time.dt
+        if key == "w" or key == "w hold":
+            self.y -= self.pan_speed * time.dt
+        if key == "s" or key == "s hold":
+            self.y += self.pan_speed * time.dt
+        if key == "scroll up":
+            self.scale += Vec3(self.zoom_speed * time.dt)
+            self.scale = min(self.scale, self.max_zoom)
+        if key == "scroll down":
+            self.scale -= Vec3(self.zoom_speed * time.dt)
+            self.scale = max(self.scale, self.min_zoom)
 
 class Hex(Entity):
-    map = {}
+    map = None
     targeting = None
     current_character = None
     turns = []
@@ -23,10 +55,10 @@ class Hex(Entity):
         self.q = q
         self.r = r
         self.s = -1 * (q+r)
-        scale = .125
+        scale = 1
         x_offset = (q + r/2) * scale
         y_offset = (r * .75) * scale
-        super().__init__(parent=camera.ui,scale=scale,x=x_offset, y=y_offset, model='quad',collider='box', texture=load_texture("hexbordered.png"), kwargs=kwargs)
+        super().__init__(parent=Hex.map,scale=scale,x=x_offset, y=y_offset, model='quad',collider='box', texture=load_texture("hexbordered.png"), kwargs=kwargs)
         self.on_click = self.clicked
         self.tooltip = Tooltip(str((q,r))+"::"+str(abs(q+r))+"::"+str(max(abs(q),abs(r))))
 
@@ -47,7 +79,7 @@ class Hex(Entity):
                 if (q,r) in Hex.map and abs(q-self.q+r-self.r) <= 1:
                     result.append(Hex.map[(q,r)])
         return result
-    
+
     def update(self):
         if Hex.current_character != None:
             self.move_cost = self.distance(Hex.current_character.parent)
@@ -80,7 +112,7 @@ class Hex(Entity):
 
     @classmethod
     def create_map(cls, radius):
-        cls.map = {}
+        cls.map = Map(parent=camera.ui)
         for q in range(-radius, radius+1):
             for r in range(-radius, radius+1):
                 if abs(q+r) <=radius:
