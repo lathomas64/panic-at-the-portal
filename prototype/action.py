@@ -112,11 +112,48 @@ class Action(Button):
                        lambda actor: actor.has_dice() and Die.selected != None,
                        basic_grapple
                        )
-        #TODO once we have a turn queue this should go to the next player's turn
+        open = Action("1+",
+                      "Open the Path",
+                      """
+                      Destroy one Obstacle within range.
+                      4+: Also destroy Obstacles adjacent to it.
+                      8+: Also destroy Obstacles adjacent to those.
+                      """,
+                      lambda actor: actor.has_dice() and Die.selected != None,
+                      print)
+        def do_challenge(actor, die, targetHex):
+            target = targetHex.children[0]
+            target.add_tokens("challenge", 1) #TODO challenge tokens need to reference challenger
+        def basic_challenge(actor, die):
+            Hex.targeting = {"actor": actor, "action": do_challenge, "die":die}
+        challenger = Action("1+",
+                            "A challenger Approaches",
+                            "Challenge an enemy within range 1=4.",
+                            lambda actor: actor.has_dice() and Die.selected != None,
+                            basic_challenge)
+        douse = Action("2+",
+                       "Put it Out!",
+                       """
+                        Remove one token from someone in range.
+                        4+: Remove another token.
+                        7+: Remove another token.
+                       """,
+                       lambda actor: actor.has_dice() and Die.selected != None,
+                       print)
+        bringit = Action("4+",
+                         "Bring it on!",
+                         "Challenge any number of enemies you can see.",
+                         lambda actor: actor.has_dice() and Die.selected != None,
+                         print)
+        rescue = Action("5+",
+                        "Rescue",
+                        "Pick an ally within range who's at 0 HP, and heal them. If they aren't in play, they return to play on the space of their choice.",
+                        lambda actor: actor.has_dice() and Die.selected != None,
+                        print)
         end = Action("",
                      "End Turn",
                      "End your turn",
                      lambda actor: True,
                      lambda actor, die: actor.end_turn())
-        cls.basic_actions = [move, damage, throw, grapple, end]
+        cls.basic_actions = [move, damage, throw, grapple, open, challenger, douse, bringit, rescue, end]
         return cls.basic_actions
