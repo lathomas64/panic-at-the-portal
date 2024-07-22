@@ -33,6 +33,14 @@ class Map(Entity):
         if key == "scroll down":
             self.scale -= Vec3(self.zoom_speed * time.dt)
             self.scale = max(self.scale, self.min_zoom)
+        if key == "escape":
+            print(key, Hex.targeting, Hex.current_character)
+            if Hex.targeting == None and Hex.current_character != None:
+                Hex.current_character.get_actions()
+                Hex.current_character.show_actions()
+            else:
+                Hex.targeting = None
+
 
 class Hex(Entity):
     map = None
@@ -92,13 +100,17 @@ class Hex(Entity):
             elif Hex.current_character != None:
                 self.tooltip.text = str(self.move_cost) + " speed tokens"
             self.tooltip.enabled = True
-        else:
-            self.color = Hex.base_color
+        elif Hex.targeting != None and self.distance(Hex.current_character.parent) <= Hex.targeting.get("range", Hex.current_character.range):
+            self.color = color.red
             self.tooltip.enabled = False
-        if((Hex.current_character != None) 
+        elif((Hex.current_character != None) 
            and self.move_cost > 0
            and self.move_cost <= Hex.current_character.get_tokens("speed")):
             self.color = color.green
+            self.tooltip.enabled = False
+        else:
+            self.color = Hex.base_color
+            self.tooltip.enabled = False
     
     def clicked(self):
         if Hex.targeting != None:

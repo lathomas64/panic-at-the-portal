@@ -9,12 +9,13 @@ class Character(SpriteSheetAnimation):
     # actions movement die in speed tokens out
 
     def __init__(self, sheet="placeholder_character.png", name="default name"):
-        self.range = 1
+        self.range = 2
         self.action_pool = Die.create_pool(["d4", "d6", "d8", "d10"])
         self.tokens = {}
-        self.actions = Action.get_basic_actions()
+        self.actions = []
         self.max_health = 6
         self.health = self.max_health
+        self.stance = None
 
         super().__init__(sheet, scale=.5, fps=4, z=-1, tileset_size=[4,4], animations={
         'idle' : ((0,3), (0,3)),        # makes an animation from (0,0) to (0,0), a single frame
@@ -116,17 +117,36 @@ class Character(SpriteSheetAnimation):
         else:
             action.act(self, None) #this will get more complicated later with token actions
 
-    def start_turn(self):
-        # anything else at start of turn
-        for die in self.action_pool:
-            die.roll()
-            die.enabled = True
+    def get_actions(self):
+        print("get actions...")
+        for action in self.actions:
+            action.enabled = False 
+        #build out top level menu of actions
+        self.actions = Action.get_basic_actions()
+        if self.stance != None:
+            self.actions += self.stance.get_actions()
+
+    def set_actions(self, actions):
+        for action in self.actions:
+            action.enabled = False 
+        self.actions = actions
+        self.show_actions()
+
+    def show_actions(self):
         for index in range(len(self.actions)):
             action = self.actions[index]
             # these will have to adjust based on index in future when there are multiple
             action.x = window.top_left.x+.17
             action.y = .3 - .1125 * index
             action.enabled = True
+
+    def start_turn(self):
+        # anything else at start of turn
+        for die in self.action_pool:
+            die.roll()
+            die.enabled = True
+        self.get_actions()
+        self.show_actions()
     
     def end_turn(self):
         self.tokens["speed"] = 0 # unless special conditions
