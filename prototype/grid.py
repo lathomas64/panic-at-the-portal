@@ -69,6 +69,8 @@ class Hex(Entity):
         super().__init__(parent=Hex.map,scale=scale,x=x_offset, y=y_offset, model='quad',collider='box', texture=load_texture("hexbordered.png"), kwargs=kwargs)
         self.on_click = self.clicked
         self.tooltip = Tooltip(str((q,r))+"::"+str(abs(q+r))+"::"+str(max(abs(q),abs(r))))
+        if random.random() < .3:
+            self.texture = load_texture("hexrubble.png")
 
     def empty(self):
         return len(self.children) == 0
