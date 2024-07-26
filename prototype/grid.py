@@ -60,6 +60,7 @@ class Hex(Entity):
     }
 
     def __init__(self, q,r, **kwargs):
+        self.obstacle = None
         self.q = q
         self.r = r
         self.s = -1 * (q+r)
@@ -70,8 +71,22 @@ class Hex(Entity):
         self.on_click = self.clicked
         self.tooltip = Tooltip(str((q,r))+"::"+str(abs(q+r))+"::"+str(max(abs(q),abs(r))))
         if random.random() < .3:
-            self.texture = load_texture("hexrubble.png")
+            self.addRubble()
 
+    def addRubble(self):
+        self.obstacle = "rubble"
+        self.texture = load_texture("hexrubble.png")
+        #self.move_cost = 2 #no move_cost is total calculated in distance
+    
+    def clearObstacles(self, radius):
+        if self.obstacle == None: #exit early so we don't radiate out from hexes without obstacles
+            return
+        self.obstacle = None 
+        self.texture = load_texture("hexbordered.png")
+        if radius > 0:
+            for neighbor in self.neighbors():
+                neighbor.clearObstacles(radius-1)
+    
     def empty(self):
         return len(self.children) == 0
 

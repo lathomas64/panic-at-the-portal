@@ -95,6 +95,9 @@ class Action(Button):
             if actor.parent.distance(targetHex) > 1: #throw has a fixed range
                 FadingText("out of range", targetHex, color.red)
                 return
+            if len(targetHex.children) == 0:
+                FadingText("No valid target", targetHex, color.red)
+                return
             target = targetHex.children[0]
             actor.push(target, die.value)
             Hex.targeting = None
@@ -112,6 +115,9 @@ class Action(Button):
             if actor.parent.distance(targetHex) > actor.range:
                 FadingText("out of range", targetHex, color.red)
                 return
+            if len(targetHex.children) == 0:
+                FadingText("No valid target", targetHex, color.red)
+                return
             target = targetHex.children[0]
             actor.pull(target, die.value)
             Hex.targeting = None
@@ -124,6 +130,22 @@ class Action(Button):
                        lambda actor: actor.has_dice() and Die.selected != None,
                        basic_grapple
                        )
+        
+        def do_open(actor, die, targetHex):
+            if targetHex.obstacle == None:
+                FadingText("No Obstacles here", targetHex, color.red)
+                return 
+            radius = 0
+            if die.value >= 8:
+                radius = 2
+            elif die.value >= 4:
+                radius = 1
+            targetHex.clearObstacles(radius)
+            Hex.targeting = None
+            die.consume()    
+        def basic_open(actor, die):
+            Hex.targeting = {"actor": actor, "action": do_open, "die": die}
+
         open = Action("1+",
                       "Open the Path",
                       """
@@ -132,10 +154,13 @@ class Action(Button):
                       8+: Also destroy Obstacles adjacent to those.
                       """,
                       lambda actor: actor.has_dice() and Die.selected != None,
-                      print)
+                      basic_open)
         def do_challenge(actor, die, targetHex):
             if actor.parent.distance(targetHex) > 4:
                 FadingText("out of range", targetHex, color.red)
+                return
+            if len(targetHex.children) == 0:
+                FadingText("No valid target", targetHex, color.red)
                 return
             target = targetHex.children[0]
             target.add_tokens("challenge", 1) #TODO challenge tokens need to reference challenger
@@ -145,7 +170,7 @@ class Action(Button):
             Hex.targeting = {"actor": actor, "action": do_challenge, "die":die, "range":4}
         challenger = Action("1+",
                             "A challenger Approaches",
-                            "Challenge an enemy within range 1=4.",
+                            "Challenge an enemy within range 1-4.",
                             lambda actor: actor.has_dice() and Die.selected != None,
                             basic_challenge)
         douse = Action("2+",
