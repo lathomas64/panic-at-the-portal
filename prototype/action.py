@@ -229,19 +229,17 @@ class Action(Button):
                 FadingText("No valid target", targetHex, color.red)
                 return
             target = targetHex.children[0]
-            def challenge_targets(targets):
-                for targeted in targets:
+            def challenge_targets():
+                for targeted in Hex.targeting["targets"]:
                     targeted.add_tokens("challenge", 1)
                 Hex.targeting = None
                 die.consume()
                 destroy(cls.confirm)
-            cls.confirm = Button("confirm targets", scale=(.3,.1), on_click=Func(challenge_targets, cls.targets))
+            cls.confirm = Button("confirm targets", scale=(.3,.1), on_click=Func(challenge_targets))
             cls.confirm.x = window.top_right.x-.17
-            cls.targets.append(target)
-            target.color = color.red # TODO actual targeting here.
+            Hex.targeting["targets"].append(target)
         def basic_bring(actor, die):
-            cls.targets = []
-            Hex.targeting = {"actor": actor, "action": do_bring, "die":die, "range": maxsize}
+            Hex.targeting = {"actor": actor, "action": do_bring, "die":die, "range": maxsize, "targets":[]}
         bringit = Action("4+",
                          "Bring it on!",
                          "Challenge any number of enemies you can see.",

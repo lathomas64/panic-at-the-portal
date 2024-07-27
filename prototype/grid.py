@@ -117,13 +117,16 @@ class Hex(Entity):
             elif Hex.current_character != None:
                 self.tooltip.text = str(self.move_cost) + " speed tokens"
             self.tooltip.enabled = True
+        elif Hex.targeting != None and "targets" in Hex.targeting and len(self.children) > 0 and self.children[0] in Hex.targeting["targets"]:
+            self.color = color.green 
+            self.tooltip.enabled = False
         elif Hex.targeting != None and self.distance(Hex.current_character.parent) <= Hex.targeting.get("range", Hex.current_character.range):
             self.color = color.red
             self.tooltip.enabled = False
         elif((Hex.current_character != None) 
            and self.move_cost > 0
            and self.move_cost <= Hex.current_character.get_tokens("speed")):
-            self.color = color.green
+            self.color = color.blue
             self.tooltip.enabled = False
         else:
             self.color = Hex.base_color
