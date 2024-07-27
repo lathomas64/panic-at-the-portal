@@ -150,6 +150,7 @@ class Character(SpriteSheetAnimation):
     
     def end_turn(self):
         self.tokens["speed"] = 0 # unless special conditions
+        Die.selected = None
         for die in self.action_pool:
             die.enabled = False 
         for action in self.actions:

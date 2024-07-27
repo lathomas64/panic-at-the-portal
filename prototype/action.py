@@ -1,7 +1,8 @@
-from ursina import Button, window, color, Tooltip
+from ursina import Button, window, color, Tooltip, Func, destroy
 from grid import Hex 
 from die import Die
 from fadingText import FadingText
+from ursina.prefabs.button_list import ButtonList
 
 class Action(Button):
     basic_actions = []
@@ -173,6 +174,46 @@ class Action(Button):
                             "Challenge an enemy within range 1-4.",
                             lambda actor: actor.has_dice() and Die.selected != None,
                             basic_challenge)
+        def do_douse(actor, die, targetHex):
+            if actor.parent.distance(targetHex) > actor.range:
+                FadingText("out of range", targetHex, color.red)
+                return
+            if len(targetHex.children) == 0:
+                FadingText("No valid target", targetHex, color.red)
+                return
+            target = targetHex.children[0]
+            tokenCount = 1
+            if die.value >= 7:
+                tokenCount = 3
+            elif die.value >= 4:
+                tokenCount = 2
+            cls.tokenCount = tokenCount #temporary variable to allow tokenCount to be accessible inside decrement
+            def decrement_tokens(token_type):
+                target.spend_tokens(token_type, 1)
+                print(target.tokens)
+                cls.tokenCount -= 1
+                if target.get_tokens(token_type) <= 0:
+                    print("does this fire?")
+                    del token_dict[token_type]
+                    token_list.button_dict = token_dict
+                if cls.tokenCount == 0:
+                    destroy(token_list)
+                if len(token_dict) <= 0:
+                    destroy(token_list)
+
+            token_dict = {}
+            for token_type in target.tokens.keys():
+                if target.get_tokens(token_type) > 0:
+                    token_dict[token_type] = Func(decrement_tokens, token_type)
+            print(token_dict)
+            if len(token_dict) <= 0:
+                FadingText("No Tokens to remove", targetHex, color.red)
+                return
+            token_list = ButtonList(token_dict, font='VeraMono.ttf', button_height=1.5, popup=0, clear_selected_on_enable=False)
+            Hex.targeting = None 
+            die.consume()
+        def basic_douse(actor, die):
+            Hex.targeting = {"actor": actor, "action": do_douse, "die":die}
         douse = Action("2+",
                        "Put it Out!",
                        """
@@ -180,17 +221,17 @@ class Action(Button):
                         4+: Remove another token.
                         7+: Remove another token.
                        """,
-                       lambda actor: actor.has_dice() and Die.selected != None,
-                       print)
+                       lambda actor: actor.has_dice() and Die.selected != None and Die.selected.value >=2,
+                       basic_douse)
         bringit = Action("4+",
                          "Bring it on!",
                          "Challenge any number of enemies you can see.",
-                         lambda actor: actor.has_dice() and Die.selected != None,
+                         lambda actor: actor.has_dice() and Die.selected != None and Die.selected.value >=4,
                          print)
         rescue = Action("5+",
                         "Rescue",
                         "Pick an ally within range who's at 0 HP, and heal them. If they aren't in play, they return to play on the space of their choice.",
-                        lambda actor: actor.has_dice() and Die.selected != None,
+                        lambda actor: actor.has_dice() and Die.selected != None and Die.selected.value >=5,
                         print)
         act = Action("",
                      "Act",
