@@ -1,6 +1,7 @@
 from ursina import *
 from grid import Hex
 from character import Character
+from ursina.prefabs.splash_screen import SplashScreen
 #trying to put everything sofar together
 
 if __name__ == "__main__":
@@ -14,4 +15,6 @@ if __name__ == "__main__":
     Hex.turns = [player, dummy]
     Hex.advance_turn()
     #window.fullscreen = True
+    splash = SplashScreen()
+    Sprite("background", z=1)
     app.run()

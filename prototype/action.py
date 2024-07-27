@@ -27,7 +27,7 @@ class Action(Button):
         else:
             #self.enabled = False
             self.disabled = True
-            self.on_click = None
+            self.on_click = print
             self.color = color.gray
             pass
     
