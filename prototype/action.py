@@ -3,6 +3,7 @@ from grid import Hex
 from die import Die
 from fadingText import FadingText
 from ursina.prefabs.button_list import ButtonList
+from sys import maxsize
 
 class Action(Button):
     basic_actions = []
@@ -223,11 +224,29 @@ class Action(Button):
                        """,
                        lambda actor: actor.has_dice() and Die.selected != None and Die.selected.value >=2,
                        basic_douse)
+        def do_bring(actor, die, targetHex):
+            if len(targetHex.children) == 0:
+                FadingText("No valid target", targetHex, color.red)
+                return
+            target = targetHex.children[0]
+            def challenge_targets(targets):
+                for targeted in targets:
+                    targeted.add_tokens("challenge", 1)
+                Hex.targeting = None
+                die.consume()
+                destroy(cls.confirm)
+            cls.confirm = Button("confirm targets", scale=(.3,.1), on_click=Func(challenge_targets, cls.targets))
+            cls.confirm.x = window.top_right.x-.17
+            cls.targets.append(target)
+            target.color = color.red # TODO actual targeting here.
+        def basic_bring(actor, die):
+            cls.targets = []
+            Hex.targeting = {"actor": actor, "action": do_bring, "die":die, "range": maxsize}
         bringit = Action("4+",
                          "Bring it on!",
                          "Challenge any number of enemies you can see.",
                          lambda actor: actor.has_dice() and Die.selected != None and Die.selected.value >=4,
-                         print)
+                         basic_bring)
         rescue = Action("5+",
                         "Rescue",
                         "Pick an ally within range who's at 0 HP, and heal them. If they aren't in play, they return to play on the space of their choice.",
