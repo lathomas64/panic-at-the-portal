@@ -8,6 +8,7 @@ def make_dummy(x,y):
     dummy = Character("faceless_character.png", "dummy")
     dummy.parent = Hex.map[x,y]
     dummy.play_animation("walk_left")
+    dummy.default_animation = "walk_left"
     Hex.turns.append(dummy)
 
 if __name__ == "__main__":

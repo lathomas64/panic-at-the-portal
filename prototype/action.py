@@ -245,11 +245,25 @@ class Action(Button):
                          "Challenge any number of enemies you can see.",
                          lambda actor: actor.has_dice() and Die.selected != None and Die.selected.value >=4,
                          basic_bring)
+        def do_rescue(actor, die, targetHex):
+            if len(targetHex.children) == 0:
+                FadingText("No valid target", targetHex, color.red)
+                return
+            target = targetHex.children[0]
+            if target.health > 0:
+                FadingText("Target is not down", targetHex, color.red)
+                return
+            # TODO check if they are an ally, list for out of play allies 
+            target.heal(2)
+            Hex.targeting = None
+            die.consume()
+        def basic_rescue(actor, die):
+            Hex.targeting = {"actor": actor, "action": do_rescue, "die":die}
         rescue = Action("5+",
                         "Rescue",
                         "Pick an ally within range who's at 0 HP, and heal them. If they aren't in play, they return to play on the space of their choice.",
                         lambda actor: actor.has_dice() and Die.selected != None and Die.selected.value >=5,
-                        print)
+                        basic_rescue)
         act = Action("",
                      "Act",
                      "Other basic actions",

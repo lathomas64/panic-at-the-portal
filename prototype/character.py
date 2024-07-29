@@ -9,13 +9,14 @@ class Character(SpriteSheetAnimation):
     # actions movement die in speed tokens out
 
     def __init__(self, sheet="placeholder_character.png", name="default name"):
-        self.range = 2
+        self.range = 20
         self.action_pool = Die.create_pool(["d4", "d6", "d8", "d10"])
         self.tokens = {}
         self.actions = []
         self.max_health = 6
         self.health = self.max_health
         self.stance = None
+        self.default_animation = "walk_down"
 
         super().__init__(sheet, scale=.5, fps=4, z=-1, tileset_size=[4,4], animations={
         'idle' : ((0,3), (0,3)),        # makes an animation from (0,0) to (0,0), a single frame
@@ -33,12 +34,17 @@ class Character(SpriteSheetAnimation):
         #self.health_bar.value = self.health
         FadingText(amount, self, color.red)
         if self.health <= 0:
-            self.parent = None
-            self.enabled = False
+            #self.parent = None
+            #self.enabled = False
+            self.color = color.gray
+            self.health = 0
+            self.play_animation("idle")
         print(self.health,"/",self.max_health)
     
     def heal(self, amount):
         self.health += amount
+        self.play_animation(self.default_animation)
+        self.color = color.white
         #self.health_bar.value = self.health
         FadingText(amount, self, color.green)
         print(self.health,"/",self.max_health)
