@@ -1,6 +1,6 @@
 from action import Action
 from die import Die
-from grid import Hex
+from grid import Map
 from fadingText import FadingText
 from ursina import SpriteSheetAnimation, window, color
 #from ursina.prefabs.health_bar import HealthBar
@@ -80,8 +80,8 @@ class Character(SpriteSheetAnimation):
                     destination_r += 1
                 else:
                     destination_r -= 1
-            if (destination_q, destination_r) in Hex.map:
-                target.parent = Hex.map[destination_q, destination_r]
+            if (destination_q, destination_r) in Map.get_map():
+                target.parent = Map.get_map()[destination_q, destination_r]
             #should we have an else?
         #TODO handle ringout if their final destination is outside the map.
 
@@ -161,7 +161,7 @@ class Character(SpriteSheetAnimation):
             die.enabled = False 
         for action in self.actions:
             action.enabled = False 
-        Hex.advance_turn()
+        Map.get_map().advance_turn()
     
     def __del__(self):
         print("character deleted...")

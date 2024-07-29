@@ -1,5 +1,5 @@
 from ursina import Button, window, color, Tooltip, Func, destroy
-from grid import Hex 
+from grid import Map 
 from die import Die
 from fadingText import FadingText
 from ursina.prefabs.button_list import ButtonList
@@ -9,7 +9,7 @@ class Action(Button):
     basic_actions = []
     def __init__(self, cost, name, description, available, act):
         super().__init__(scale=(.3,.1), x = window.top_left.x+.170, y=3, text=str(self))
-        self.on_click = lambda : self.act(Hex.current_character, Die.selected)
+        self.on_click = lambda : self.act(Map.get_map().current_character, Die.selected)
         self.cost = cost
         self.name = name 
         self.description = description 
@@ -20,10 +20,10 @@ class Action(Button):
     
     def update(self):
         self.text = self.cost + ": " + self.name
-        if self.available(Hex.current_character):
+        if self.available(Map.get_map().current_character):
             #self.enabled = True 
             self.disabled = False
-            self.on_click = self.on_click = lambda : self.act(Hex.current_character, Die.selected)
+            self.on_click = self.on_click = lambda : self.act(Map.get_map().current_character, Die.selected)
             self.color = color.black
             pass
         else:
@@ -77,11 +77,11 @@ class Action(Button):
             else:
                 print("Deal 1 damage")
                 target.take_damage(1)
-            Hex.targeting = None
+            Map.targeting = None
             die.consume()
         def basic_damage(actor, die):
             print(actor, " trying to use damage action with ",die)
-            Hex.targeting = {"actor":actor, "action":do_damage, "die":die}
+            Map.targeting = {"actor":actor, "action":do_damage, "die":die}
         damage = Action("1+",
                         "Damage",
                         """
@@ -102,10 +102,10 @@ class Action(Button):
                 return
             target = targetHex.children[0]
             actor.push(target, die.value)
-            Hex.targeting = None
+            Map.targeting = None
             die.consume()
         def basic_throw(actor, die):
-            Hex.targeting = {"actor": actor, "action": do_throw, "die": die, "range":1}
+            Map.targeting = {"actor": actor, "action": do_throw, "die": die, "range":1}
         throw = Action("X",
                        "Throw",
                        "Choose an adjacent enemy or ally, and push them X spaces.",
@@ -122,10 +122,10 @@ class Action(Button):
                 return
             target = targetHex.children[0]
             actor.pull(target, die.value)
-            Hex.targeting = None
+            Map.targeting = None
             die.consume()
         def basic_grapple(actor, die):
-            Hex.targeting = {"actor": actor, "action": do_grapple, "die": die}
+            Map.targeting = {"actor": actor, "action": do_grapple, "die": die}
         grapple = Action("X",
                        "Grapple",
                        "Choose an enemy or ally within range, and pull them X spaces towards you.",
@@ -143,10 +143,10 @@ class Action(Button):
             elif die.value >= 4:
                 radius = 1
             targetHex.clearObstacles(radius)
-            Hex.targeting = None
+            Map.targeting = None
             die.consume()    
         def basic_open(actor, die):
-            Hex.targeting = {"actor": actor, "action": do_open, "die": die}
+            Map.targeting = {"actor": actor, "action": do_open, "die": die}
 
         open = Action("1+",
                       "Open the Path",
@@ -166,10 +166,10 @@ class Action(Button):
                 return
             target = targetHex.children[0]
             target.add_tokens("challenge", 1) #TODO challenge tokens need to reference challenger
-            Hex.targeting = None 
+            Map.targeting = None 
             die.consume()
         def basic_challenge(actor, die):
-            Hex.targeting = {"actor": actor, "action": do_challenge, "die":die, "range":4}
+            Map.targeting = {"actor": actor, "action": do_challenge, "die":die, "range":4}
         challenger = Action("1+",
                             "A challenger Approaches",
                             "Challenge an enemy within range 1-4.",
@@ -211,10 +211,10 @@ class Action(Button):
                 FadingText("No Tokens to remove", targetHex, color.red)
                 return
             token_list = ButtonList(token_dict, font='VeraMono.ttf', button_height=1.5, popup=0, clear_selected_on_enable=False)
-            Hex.targeting = None 
+            Map.targeting = None 
             die.consume()
         def basic_douse(actor, die):
-            Hex.targeting = {"actor": actor, "action": do_douse, "die":die}
+            Map.targeting = {"actor": actor, "action": do_douse, "die":die}
         douse = Action("2+",
                        "Put it Out!",
                        """
@@ -230,16 +230,16 @@ class Action(Button):
                 return
             target = targetHex.children[0]
             def challenge_targets():
-                for targeted in Hex.targeting["targets"]:
+                for targeted in Map.targeting["targets"]:
                     targeted.add_tokens("challenge", 1)
-                Hex.targeting = None
+                Map.targeting = None
                 die.consume()
                 destroy(cls.confirm)
             cls.confirm = Button("confirm targets", scale=(.3,.1), on_click=Func(challenge_targets))
             cls.confirm.x = window.top_right.x-.17
-            Hex.targeting["targets"].append(target)
+            Map.targeting["targets"].append(target)
         def basic_bring(actor, die):
-            Hex.targeting = {"actor": actor, "action": do_bring, "die":die, "range": maxsize, "targets":[]}
+            Map.targeting = {"actor": actor, "action": do_bring, "die":die, "range": maxsize, "targets":[]}
         bringit = Action("4+",
                          "Bring it on!",
                          "Challenge any number of enemies you can see.",
@@ -255,10 +255,10 @@ class Action(Button):
                 return
             # TODO check if they are an ally, list for out of play allies 
             target.heal(2)
-            Hex.targeting = None
+            Map.targeting = None
             die.consume()
         def basic_rescue(actor, die):
-            Hex.targeting = {"actor": actor, "action": do_rescue, "die":die}
+            Map.targeting = {"actor": actor, "action": do_rescue, "die":die}
         rescue = Action("5+",
                         "Rescue",
                         "Pick an ally within range who's at 0 HP, and heal them. If they aren't in play, they return to play on the space of their choice.",

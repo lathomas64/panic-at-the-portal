@@ -1,27 +1,29 @@
 from ursina import *
-from grid import Hex
+from grid import Map
 from character import Character
 from ursina.prefabs.splash_screen import SplashScreen
 #trying to put everything sofar together
 
 def make_dummy(x,y):
     dummy = Character("faceless_character.png", "dummy")
-    dummy.parent = Hex.map[x,y]
+    dummy.parent = Map.get_map()[x,y]
     dummy.play_animation("walk_left")
     dummy.default_animation = "walk_left"
-    Hex.turns.append(dummy)
+    map.turns.append(dummy)
 
 if __name__ == "__main__":
     app = Ursina()
-    Hex.create_map(5)
+    map = Map.create_map(5)
     player = Character(name="player")
-    player.parent = Hex.map[(-4,0)]
-    Hex.turns = [player]
+    player.parent = map[(-4,0)]
+    map.turns = [player]
 
     make_dummy(4,0)
     make_dummy(0,0)
     make_dummy(-2,2)
-    Hex.advance_turn()
+    print("before advance turn", map.current_character)
+    map.advance_turn()
+    print("after advance turn", map.current_character)
     #window.fullscreen = True
     splash = SplashScreen()
     Sprite("background", z=1)

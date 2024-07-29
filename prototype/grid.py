@@ -2,12 +2,22 @@ from ursina import *
 
 class Map(Entity):
     hexes = {}
+    turns = []
+    targeting = None
+    current_character = None
     pan_speed = 5
     zoom_speed = 1
     max_zoom = .5
     min_zoom = .05
-    def __init__(self, **kwargs):
+    instance = None
+    def __init__(self, radius, **kwargs):
         super().__init__(parent=camera.ui,scale=.1, z=100,kwargs=kwargs)
+        if radius != None:
+            for q in range(-radius, radius+1):
+                for r in range(-radius, radius+1):
+                    if abs(q+r) <=radius:
+                        hex = Hex(q,r, parent=self)
+                        self[(q,r)] = hex
     
     def __setitem__(self, key, value):
         self.hexes[key] = value
@@ -19,6 +29,7 @@ class Map(Entity):
 
 
     def input(self, key):
+        print(key, type(self), self)
         if key == "a" or key == "a hold":
             self.x += self.pan_speed * time.dt
         if key == "d" or key == "d hold":
@@ -34,19 +45,32 @@ class Map(Entity):
             self.scale -= Vec3(self.zoom_speed * time.dt)
             self.scale = max(self.scale, self.min_zoom)
         if key == "escape":
-            print(key, Hex.targeting, Hex.current_character)
-            if Hex.targeting == None and Hex.current_character != None:
-                Hex.current_character.get_actions()
-                Hex.current_character.show_actions()
+            print(key, self.targeting, self.current_character)
+            if self.targeting == None and self.current_character != None:
+                self.current_character.get_actions()
+                self.current_character.show_actions()
             else:
-                Hex.targeting = None
+                self.targeting = None
+    
+    def advance_turn(self):
+        if self.current_character != None: #skip this if we haven't done a turn yet
+            self.turns.remove(self.current_character)
+            self.turns.append(self.current_character)
+        self.current_character = self.turns[0]
+        self.current_character.start_turn()
+
+    @classmethod
+    def create_map(cls, radius=None):
+        cls.instance = Map(radius)
+        return cls.instance
+    
+    @classmethod
+    def get_map(cls):
+        return cls.instance
 
 
 class Hex(Entity):
     map = None
-    targeting = None
-    current_character = None
-    turns = []
     base_color = color.white 
     hover_color = color.gray
     move_cost = -1
@@ -67,7 +91,8 @@ class Hex(Entity):
         scale = 1
         x_offset = (q + r/2) * scale
         y_offset = (r * .75) * scale
-        super().__init__(parent=Hex.map,scale=scale,x=x_offset, y=y_offset, model='quad',collider='box', texture=load_texture("hexbordered.png"), kwargs=kwargs)
+        super().__init__(parent=kwargs["parent"],scale=scale,x=x_offset, y=y_offset, model='quad',collider='box', texture=load_texture("hexbordered.png"), kwargs=kwargs)
+        self.map = self.parent
         self.on_click = self.clicked
         self.tooltip = Tooltip(str((q,r))+"::"+str(abs(q+r))+"::"+str(max(abs(q),abs(r))))
         if random.random() < .3:
@@ -106,26 +131,26 @@ class Hex(Entity):
         return result
 
     def update(self):
-        if Hex.current_character != None:
-            self.move_cost = self.distance(Hex.current_character.parent)
+        if self.map.current_character != None:
+            self.move_cost = self.distance(self.map.current_character.parent)
         else:
             self.move_cost = -1
         if(self.hovered):
             self.color = Hex.hover_color
             if self.children != []:
                 self.tooltip.text = str(self.children[0])
-            elif Hex.current_character != None:
+            elif self.map.current_character != None:
                 self.tooltip.text = str(self.move_cost) + " speed tokens"
             self.tooltip.enabled = True
-        elif Hex.targeting != None and "targets" in Hex.targeting and len(self.children) > 0 and self.children[0] in Hex.targeting["targets"]:
+        elif self.map.targeting != None and "targets" in self.map.targeting and len(self.children) > 0 and self.children[0] in self.map.targeting["targets"]:
             self.color = color.green 
             self.tooltip.enabled = False
-        elif Hex.targeting != None and self.distance(Hex.current_character.parent) <= Hex.targeting.get("range", Hex.current_character.range):
+        elif self.map.targeting != None and self.distance(self.map.current_character.parent) <= self.map.targeting.get("range", self.map.current_character.range):
             self.color = color.red
             self.tooltip.enabled = False
-        elif((Hex.current_character != None) 
+        elif((self.map.current_character != None) 
            and self.move_cost > 0
-           and self.move_cost <= Hex.current_character.get_tokens("speed")):
+           and self.move_cost <= self.map.current_character.get_tokens("speed")):
             self.color = color.blue
             self.tooltip.enabled = False
         else:
@@ -133,48 +158,16 @@ class Hex(Entity):
             self.tooltip.enabled = False
     
     def clicked(self):
-        if Hex.targeting != None:
-            Hex.targeting["action"](Hex.targeting["actor"],Hex.targeting["die"], self)
+        if self.map.targeting != None:
+            self.map.targeting["action"](self.map.targeting["actor"],self.map.targeting["die"], self)
             return
         print("clicked:",self.q,self.r)
-        if(self.empty() and (Hex.current_character != None) and self.move_cost <= Hex.current_character.get_tokens("speed")):
-            cost = self.distance(Hex.current_character.parent)
-            Hex.current_character.parent = self
-            Hex.current_character.spend_tokens("speed", cost)
-
-    @classmethod
-    def create_map(cls, radius):
-        cls.map = Map(parent=camera.ui)
-        for q in range(-radius, radius+1):
-            for r in range(-radius, radius+1):
-                if abs(q+r) <=radius:
-                    hex = Hex(q,r)
-                    cls.map[(q,r)] = hex
-        return cls.map
-    
-    @classmethod
-    def advance_turn(cls):
-        if cls.current_character != None: #skip this if we haven't done a turn yet
-            cls.turns.remove(cls.current_character)
-            cls.turns.append(cls.current_character)
-        cls.current_character = cls.turns[0]
-        cls.current_character.start_turn()
-
-
+        if(self.empty() and (self.map.current_character != None) and self.move_cost <= self.map.current_character.get_tokens("speed")):
+            cost = self.distance(self.map.current_character.parent)
+            self.map.current_character.parent = self
+            self.map.current_character.spend_tokens("speed", cost)
 
 if __name__ == "__main__":
     app = Ursina()
-    my_map = Hex.create_map(4)
-    player = SpriteSheetAnimation("placeholder_character.png", scale=.5, fps=4, z=-1, tileset_size=[4,4], animations={
-        'idle' : ((0,3), (0,3)),        # makes an animation from (0,0) to (0,0), a single frame
-        'walk_up' : ((0,0), (3,0)),     # makes an animation from (0,0) to (3,0), the bottom row
-        'walk_right' : ((0,1), (3,1)),
-        'walk_left' : ((0,2), (3,2)),
-        'walk_down' : ((0,3), (3,3)),
-        })
-
-    player.play_animation('walk_down')
-    player.parent = Hex.map[(0,0)]
-    Hex.current_character = player
-
+    my_map = Map.create_map(4)
     app.run()
