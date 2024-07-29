@@ -2,13 +2,13 @@ from action import Action
 from die import Die
 from grid import Map
 from fadingText import FadingText
-from ursina import SpriteSheetAnimation, window, color
+from ursina import SpriteSheetAnimation, window, color, time
 #from ursina.prefabs.health_bar import HealthBar
 
 class Character(SpriteSheetAnimation):
     # actions movement die in speed tokens out
 
-    def __init__(self, sheet="placeholder_character.png", name="default name"):
+    def __init__(self, sheet="placeholder_character.png", name="default"):
         self.range = 20
         self.action_pool = Die.create_pool(["d4", "d6", "d8", "d10"])
         self.tokens = {}
@@ -16,6 +16,7 @@ class Character(SpriteSheetAnimation):
         self.max_health = 6
         self.health = self.max_health
         self.stance = None
+        self.team = name
         self.default_animation = "walk_down"
 
         super().__init__(sheet, scale=.5, fps=4, z=-1, tileset_size=[4,4], animations={
@@ -169,8 +170,44 @@ class Character(SpriteSheetAnimation):
         return self.name + "\n" + str(self.health) + "/" + str(self.max_health)
 
 
-# Basic actions
-
+class AICharacter(Character):
+    state = None
+    wait_time = -1
+    wait_function = None
+    def idle(self):
+        FadingText(self.name + " seems oblivious",self.parent, color.black, 1)
+        self.wait_time = 1
+        self.wait_function = self.end_turn
+        #self.end_turn()
+    
+    def find_enemies(self):
+        return [character for character in Map.get_map().turns if character.team == None or character.team != self.team]
+    
+    def start_turn(self):
+        print("AICharacter start turn...")
+        super().start_turn()
+        print("enemies:", self.find_enemies())
+        if self.state == None:
+            self.state = self.idle
+        self.wait_time = 1
+        self.wait_function = self.state
+    
+    def end_turn(self):
+        self.wait_time = -1
+        self.wait_function = None 
+        super().end_turn()
+    
+    def update(self):
+        if self.state != self.end_turn and self.health <= 0:
+            self.default_state = self.state 
+            self.state = self.end_turn
+        elif self.state == self.end_turn and self.health > 0:
+            self.state = self.default_state
+        if Map.get_map().current_character == self:
+            if self.wait_time > 0 and self.wait_function != None:
+                self.wait_time -= time.dt
+                if self.wait_time <= 0:
+                    self.wait_function()
 
 if __name__ == "__main__": # this example is probably broken and needs to be rewritten
     oc = Character()

@@ -1,11 +1,11 @@
 from ursina import *
 from grid import Map
-from character import Character
+from character import Character, AICharacter
 from ursina.prefabs.splash_screen import SplashScreen
 #trying to put everything sofar together
 
 def make_dummy(x,y):
-    dummy = Character("faceless_character.png", "dummy")
+    dummy = AICharacter("faceless_character.png", "dummy")
     dummy.parent = Map.get_map()[x,y]
     dummy.play_animation("walk_left")
     dummy.default_animation = "walk_left"

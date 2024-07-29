@@ -29,7 +29,6 @@ class Map(Entity):
 
 
     def input(self, key):
-        print(key, type(self), self)
         if key == "a" or key == "a hold":
             self.x += self.pan_speed * time.dt
         if key == "d" or key == "d hold":
@@ -133,6 +132,12 @@ class Hex(Entity):
     def update(self):
         if self.map.current_character != None:
             self.move_cost = self.distance(self.map.current_character.parent)
+            if self.map.current_character in self.children:
+                self.texture = load_texture("hexcurrent.png")
+            elif self.obstacle == "rubble":
+                self.texture = load_texture("hexrubble.png")
+            else:
+                self.texture = load_texture("hexbordered.png")
         else:
             self.move_cost = -1
         if(self.hovered):
