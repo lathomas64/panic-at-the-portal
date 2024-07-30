@@ -9,7 +9,7 @@ class Character(SpriteSheetAnimation):
     # actions movement die in speed tokens out
 
     def __init__(self, sheet="placeholder_character.png", name="default"):
-        self.range = 20
+        self.range = 2
         self.action_pool = Die.create_pool(["d4", "d6", "d8", "d10"])
         self.tokens = {}
         self.actions = []
@@ -154,6 +154,8 @@ class Character(SpriteSheetAnimation):
             die.enabled = True
         self.get_actions()
         self.show_actions()
+        self.parent.move_cost = 0
+        self.parent.flood_move_cost()
     
     def end_turn(self):
         self.tokens["speed"] = 0 # unless special conditions

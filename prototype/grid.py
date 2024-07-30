@@ -1,4 +1,5 @@
 from ursina import *
+from sys import maxsize
 
 class Map(Entity):
     hexes = {}
@@ -23,6 +24,7 @@ class Map(Entity):
         self.hexes[key] = value
 
     def __getitem__(self, key):
+        print("getitem key:",key)
         return self.hexes[key]
     def __contains__(self, key):
         return key in self.hexes
@@ -125,13 +127,13 @@ class Hex(Entity):
             for r in range(self.r-1,self.r+2):
                 if (q,r) == (self.q,self.r):
                     continue # don't count myself as a neighbor
-                if (q,r) in Hex.map and abs(q-self.q+r-self.r) <= 1:
-                    result.append(Hex.map[(q,r)])
+                if (q,r) in Map.get_map() and abs(q-self.q+r-self.r) <= 1:
+                    result.append(Map.get_map()[(q,r)])
         return result
 
     def update(self):
         if self.map.current_character != None:
-            self.move_cost = self.distance(self.map.current_character.parent)
+            #self.move_cost = self.distance(self.map.current_character.parent)
             if self.map.current_character in self.children:
                 self.texture = load_texture("hexcurrent.png")
             elif self.obstacle == "rubble":
@@ -168,9 +170,28 @@ class Hex(Entity):
             return
         print("clicked:",self.q,self.r)
         if(self.empty() and (self.map.current_character != None) and self.move_cost <= self.map.current_character.get_tokens("speed")):
-            cost = self.distance(self.map.current_character.parent)
             self.map.current_character.parent = self
-            self.map.current_character.spend_tokens("speed", cost)
+            self.map.current_character.spend_tokens("speed", self.move_cost)
+            [hex.__setattr__("move_cost",-1) for hex in Map.get_map().hexes.values()]
+            self.move_cost = 0
+            self.flood_move_cost()
+    
+    def flood_move_cost(self):
+        blank_neighbors = [neighbor for neighbor in self.neighbors() if neighbor.move_cost == -1 and neighbor.empty()]
+        if len(blank_neighbors) == 0:
+            return
+        [neighbor.flood_move_cost_helper(self.move_cost) for neighbor in self.neighbors() if neighbor.move_cost == -1]
+        [neighbor.flood_move_cost() for neighbor in blank_neighbors]
+    def flood_move_cost_helper(self, previous_cost):
+        path_costs = [neighbor.move_cost for neighbor in self.neighbors() if neighbor.move_cost != -1 and neighbor.empty()]
+        path_cost = previous_cost
+        if len(path_costs) >= 0:
+            path_cost = min(path_costs+[previous_cost])
+
+        if self.obstacle == "rubble":
+            self.move_cost = path_cost + 2
+        else:
+            self.move_cost = path_cost +1
 
 if __name__ == "__main__":
     app = Ursina()
