@@ -24,7 +24,6 @@ class Map(Entity):
         self.hexes[key] = value
 
     def __getitem__(self, key):
-        print("getitem key:",key)
         return self.hexes[key]
     def __contains__(self, key):
         return key in self.hexes
