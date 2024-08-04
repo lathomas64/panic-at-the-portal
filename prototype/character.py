@@ -30,6 +30,11 @@ class Character(SpriteSheetAnimation):
         self.play_animation('walk_down')
         #self.health_bar = HealthBar(parent=self, x=.5,bar_color=color.lime.tint(-.25), roundness=.5, max_value=self.max_health, value=self.health)
 
+    def in_range(self, other, distance=None):
+        if distance == None:
+            distance = self.range
+        return self.parent.distance(other.parent) <= distance
+    
     def take_damage(self, amount):
         self.health -= amount
         #self.health_bar.value = self.health
@@ -147,6 +152,7 @@ class Character(SpriteSheetAnimation):
             action.y = .3 - .1125 * index
             action.enabled = True
 
+
     def start_turn(self):
         # anything else at start of turn
         for die in self.action_pool:
@@ -176,12 +182,73 @@ class AICharacter(Character):
     state = None
     wait_time = -1
     wait_function = None
-    def idle(self):
-        FadingText(self.name + " seems oblivious",self.parent, color.black, 1)
+
+    def get_action(self, name):
+        print(name, Action.get_basic_actions(True))
+        for action in Action.get_basic_actions(True):
+            if action.name == name:
+                return action
+        return None
+
+    def available_dice(self, value=-1):
+        if value > 1:
+            return [die for die in self.action_pool if die.used == False and die.value > value]
+        else:    
+            return [die for die in self.action_pool if die.used == False]
+    
+    def enemies_in_range(self, distance=None):
+        if distance == None:
+            distance = self.range
+        return [character for character in self.find_enemies() if self.in_range(character, distance)]
+
+    def freeze(self):
+        FadingText(self.name + " Freezes in panic",self.parent, color.black, 1)
         self.wait_time = 1
         self.wait_function = self.end_turn
         #self.end_turn()
     
+    def flight(self):
+        FadingText(self.name + " tries to flee.", self.parent, color.black, 1)
+        self.wait_time = 1
+        while len(self.available_dice()) > 0:
+            print("how to flee?")
+
+    def fight(self):
+        FadingText(self.name + " is looking for a fight.", self.parent, color.black, 1)
+        self.wait_time = 1
+        dice = self.available_dice()
+        if len(dice) == 0:
+            self.wait_function = self.end_turn
+            return
+        nearby = self.enemies_in_range()
+        if len(nearby) > 0:
+            # TODO smarter selection of which die and which target
+            die = self.available_dice()[0]
+            target = nearby[0]
+            action = self.get_action("Damage")
+            action.act(self, die)
+            Map.get_map().targeting["action"](self, die, target.parent)
+            return
+        elif len(self.enemies_in_range(4)) > 0:
+            challengable = self.enemies_in_range(4)
+            die = self.available_dice()[0]
+            target = challengable[0]
+            action = self.get_action("A Challenger Approaches")
+            action.act(self,die)
+            Map.get_map().targeting["action"](self, die, target.parent)
+            return
+        elif len(self.find_enemies()) > 0 and len(self.available_dice(4)) > 0:
+            enemies = self.find_enemies()
+            die = self.available_dice(4)[0]
+            target = enemies[0]
+            action = self.get_action("Bring it on!")
+            action.act(self,die)
+            [Map.get_map().targeting["action"](self, die,enemy.parent) for enemy in enemies]
+            Action.confirm.on_click()
+            return
+        # if we get here there's no action we can take
+        self.wait_function = self.end_turn
+
     def find_enemies(self):
         return [character for character in Map.get_map().turns if character.team == None or character.team != self.team]
     
@@ -190,7 +257,7 @@ class AICharacter(Character):
         super().start_turn()
         print("enemies:", self.find_enemies())
         if self.state == None:
-            self.state = self.idle
+            self.state = self.freeze
         self.wait_time = 1
         self.wait_function = self.state
     

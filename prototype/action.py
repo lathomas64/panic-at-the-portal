@@ -34,8 +34,8 @@ class Action(Button):
             pass
     
     @classmethod 
-    def get_basic_actions(cls):
-        if cls.basic_actions != []:
+    def get_basic_actions(cls, ai=False):
+        if cls.basic_actions != [] and not ai: # TODO Horrible hack please fix this for ai characters
             return cls.basic_actions 
         def do_move(actor, die):
             actor.add_tokens("speed", die.value)
@@ -171,7 +171,7 @@ class Action(Button):
         def basic_challenge(actor, die):
             Map.targeting = {"actor": actor, "action": do_challenge, "die":die, "range":4}
         challenger = Action("1+",
-                            "A challenger Approaches",
+                            "A Challenger Approaches",
                             "Challenge an enemy within range 1-4.",
                             lambda actor: actor.has_dice() and Die.selected != None,
                             basic_challenge)
@@ -276,4 +276,7 @@ class Action(Button):
                      lambda actor, die: actor.end_turn())
         #[throw, grapple, open, challenger, douse, bringit, rescue]
         cls.basic_actions = [move, damage, act, end]
+        print(ai)
+        if ai:
+            return [move,damage,throw,grapple,open,challenger,douse,bringit,rescue]
         return cls.basic_actions
