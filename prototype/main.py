@@ -54,10 +54,11 @@ if __name__ == "__main__":
     map.turns = [player]
     map.add(2,0)
     a = Animation("fire",fps=8, parent=map[(2,0)])
-
-    #make_dummy(4,0)
+    map.add(4,0)
+    make_dummy(4,0)
     #make_dummy(0,0)
-    #make_dummy(-2,2)
+    map.add(-2,2)
+    make_dummy(-2,2)
     print("before advance turn", map.current_character)
     map.advance_turn()
     print("after advance turn", map.current_character)
