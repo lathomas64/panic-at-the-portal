@@ -13,6 +13,7 @@ class Character(SpriteSheetAnimation):
         self.action_pool = Die.create_pool(["d4", "d6", "d8", "d10"])
         self.tokens = {}
         self.actions = []
+        self.hooks = {}
         self.max_health = 6
         self.health = self.max_health
         self.stance = None
@@ -29,6 +30,16 @@ class Character(SpriteSheetAnimation):
         self.name = name
         self.play_animation('walk_down')
         #self.health_bar = HealthBar(parent=self, x=.5,bar_color=color.lime.tint(-.25), roundness=.5, max_value=self.max_health, value=self.health)
+
+    def register_hook(self, name, func):
+        if name in self.hooks:
+            self.hooks[name].append(func)
+        else:
+            self.hooks[name] = [func]
+    
+    def fire_hook(self, name):
+        for function in self.hooks.get(name, []):
+            function()
 
     def in_range(self, other, distance=None):
         if distance == None:
@@ -162,6 +173,7 @@ class Character(SpriteSheetAnimation):
         self.show_actions()
         self.parent.move_cost = 0
         self.parent.flood_move_cost()
+        self.fire_hook("start_turn")
     
     def end_turn(self):
         self.tokens["speed"] = 0 # unless special conditions
