@@ -43,22 +43,26 @@ def display_top(snapshot, key_type='lineno', limit=3):
 def input(key):
     if key == "p":
         snapshot = tracemalloc.take_snapshot()
-        display_top(snapshot)   
+        display_top(snapshot)
+        
 if __name__ == "__main__":
     tracemalloc.start()
     app = Ursina()
-    map = Map.create_map(5)
+    map = Map.create_map(0)
     player = Character(name="player")
-    player.parent = map[(-4,0)]
+    player.parent = map[(0,0)]
     map.turns = [player]
+    map.add(2,0)
+    a = Animation("fire",fps=8, parent=map[(2,0)])
 
-    make_dummy(4,0)
-    make_dummy(0,0)
-    make_dummy(-2,2)
+    #make_dummy(4,0)
+    #make_dummy(0,0)
+    #make_dummy(-2,2)
     print("before advance turn", map.current_character)
     map.advance_turn()
     print("after advance turn", map.current_character)
     #window.fullscreen = True
     splash = SplashScreen()
     Sprite("background", z=1)
+  
     app.run()

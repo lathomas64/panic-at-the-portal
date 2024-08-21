@@ -17,8 +17,7 @@ class Map(Entity):
             for q in range(-radius, radius+1):
                 for r in range(-radius, radius+1):
                     if abs(q+r) <=radius:
-                        hex = Hex(q,r, parent=self)
-                        self[(q,r)] = hex
+                        self.add(q,r)
     
     def __setitem__(self, key, value):
         self.hexes[key] = value
@@ -28,6 +27,24 @@ class Map(Entity):
     def __contains__(self, key):
         return key in self.hexes
 
+    def add(self, q, r):
+        hex = Hex(q,r,parent=self)
+        hex.move_cost = -1
+        self[(q,r)] = hex
+    
+    def explore(self):
+        currentHex = self.current_character.parent
+        for value in currentHex.directions.values():
+            q = currentHex.q + value[0]
+            r = currentHex.r + value[1]
+            self.explore_hex(q,r)
+        currentHex.flood_move_cost()
+        
+
+    def explore_hex(self, q,r):
+        if (q,r) not in self:
+            self.add(q,r)
+            self[q,r].rotation = (90,90,90)
 
     def input(self, key):
         if key == "a" or key == "a hold":
@@ -62,6 +79,7 @@ class Map(Entity):
     @classmethod
     def create_map(cls, radius=None):
         cls.instance = Map(radius)
+        Hex.map = cls.instance
         return cls.instance
     
     @classmethod
@@ -131,6 +149,9 @@ class Hex(Entity):
         return result
 
     def update(self):
+        if self.rotation != (0,0,0):
+            self.rotation -= (10,10,10)
+            return
         if self.map.current_character != None:
             #self.move_cost = self.distance(self.map.current_character.parent)
             if self.map.current_character in self.children:
@@ -145,8 +166,10 @@ class Hex(Entity):
             self.color = Hex.hover_color
             if self.children != []:
                 self.tooltip.text = str(self.children[0])
-            elif self.map.current_character != None:
+            elif self.map.current_character != None and self.move_cost != -1:
                 self.tooltip.text = str(self.move_cost) + " speed tokens"
+            else:
+                self.tooltip.text = "unreachable"
             self.tooltip.enabled = True
         elif self.map.targeting != None and "targets" in self.map.targeting and len(self.children) > 0 and self.children[0] in self.map.targeting["targets"]:
             self.color = color.green 
@@ -166,6 +189,8 @@ class Hex(Entity):
     def clicked(self):
         if self.map.targeting != None:
             self.map.targeting["action"](self.map.targeting["actor"],self.map.targeting["die"], self)
+            return
+        if self.move_cost == -1:
             return
         print("clicked:",self.q,self.r)
         if(self.empty() and (self.map.current_character != None) and self.move_cost <= self.map.current_character.get_tokens("speed")):

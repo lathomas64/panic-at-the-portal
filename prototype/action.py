@@ -1,5 +1,5 @@
 from ursina import Button, window, color, Tooltip, Func, destroy
-from grid import Map 
+from grid import Map, Hex 
 from die import Die
 from fadingText import FadingText
 from ursina.prefabs.button_list import ButtonList
@@ -9,7 +9,6 @@ class Action(Button):
     basic_actions = []
     def __init__(self, cost, name, description, available, act):
         super().__init__(scale=(.3,.1), x = window.top_left.x+.170, y=3, text=str(self))
-        self.on_click = lambda : self.act(Map.get_map().current_character, Die.selected)
         self.cost = cost
         self.name = name 
         self.description = description 
@@ -29,7 +28,7 @@ class Action(Button):
         else:
             #self.enabled = False
             self.disabled = True
-            self.on_click = print
+            self.on_click = lambda : None
             self.color = color.gray
             pass
     
@@ -274,8 +273,16 @@ class Action(Button):
                      "End your turn",
                      lambda actor: True,
                      lambda actor, die: actor.end_turn())
+        def basic_explore(actor, die):
+            Map.get_map().explore()
+            die.consume()
+        explore = Action("1+",
+                         "Explore",
+                         "Explore what lies beyond visible borders. reveal more hexes at an edge.",
+                         lambda actor: actor.has_dice() and Die.selected != None,
+                         basic_explore)
         #[throw, grapple, open, challenger, douse, bringit, rescue]
-        cls.basic_actions = [move, damage, act, end]
+        cls.basic_actions = [move, damage,explore, act, end]
         print(ai)
         if ai:
             return [move,damage,throw,grapple,open,challenger,douse,bringit,rescue]
