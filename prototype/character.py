@@ -1,5 +1,6 @@
 from actions.action import Action
 from actions.move import MoveAction
+from actions.damage import DamageAction
 from die import Die
 from grid import Map
 from fadingText import FadingText
@@ -197,54 +198,7 @@ class Character(SpriteSheetAnimation):
         if cls.basic_actions != [] and not ai: # TODO Horrible hack please fix this for ai characters
             return cls.basic_actions 
         move = MoveAction()
-        def do_damage(actor, die, targetHex):
-            print(actor, die, targetHex)
-            print(targetHex.children)
-            if len(targetHex.children) == 0:
-                FadingText("No valid target", targetHex, color.red)
-                return
-            if actor.parent.distance(targetHex) > actor.range:
-                FadingText("out of range", targetHex, color.red)
-                return
-            target = targetHex.children[0]
-            if type(target) == FadingText:
-                print("we can't attack fading text...")
-                return
-            print("deal damage to ",target)
-            if die.value >= 9:
-                print("deal 5 damage, and push them 3 spaces")
-                target.take_damage(5)
-                actor.push(target, 3)
-            elif die.value >= 7:
-                print("Deal 4 damage, and push them 2 spaces.")
-                target.take_damage(4)
-                actor.push(target, 2)
-            elif die.value >= 5:
-                print("Deal 3 damage, and push them 1 space away")
-                target.take_damage(3)
-                actor.push(target, 1)
-            elif die.value >= 3:
-                print("Deal 2 damage")
-                target.take_damage(2)
-            else:
-                print("Deal 1 damage")
-                target.take_damage(1)
-            Map.targeting = None
-            die.consume()
-        def basic_damage(actor, die):
-            print(actor, " trying to use damage action with ",die)
-            Map.targeting = {"actor":actor, "action":do_damage, "die":die}
-        damage = Action("1+",
-                        "Damage",
-                        """
-                        Deal 1 damage to one enemy in your range
-                            3+: Deal 2 damage instead.
-                            5+: Deal 3 damage instead, and push them 1 space away.
-                            7+: Deal 4 damage instead, and push them 1 more space.
-                            9+: Deal 5 damage instead, and push them 1 more space.
-                        """,
-                        lambda actor: actor.has_dice() and Die.selected != None,
-                        basic_damage)
+        damage = DamageAction()
         def do_throw(actor, die, targetHex):
             if actor.parent.distance(targetHex) > 1: #throw has a fixed range
                 FadingText("out of range", targetHex, color.red)

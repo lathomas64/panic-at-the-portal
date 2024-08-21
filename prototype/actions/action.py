@@ -16,6 +16,9 @@ class Action(Button):
         self.tooltip = Tooltip(self.description)
         self.enabled = False
     
+    def available(self,actor):
+        return actor.has_dice() and Die.selected != None
+    
     def update(self):
         self.text = self.cost + ": " + self.name
         if self.available(Map.get_map().current_character):
