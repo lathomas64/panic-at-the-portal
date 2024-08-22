@@ -187,6 +187,7 @@ class Hex(Entity):
             self.tooltip.enabled = False
     
     def clicked(self):
+        print(self.children)
         if self.map.targeting != None:
             self.map.targeting["action"](self.map.targeting["actor"],self.map.targeting["die"], self)
             return

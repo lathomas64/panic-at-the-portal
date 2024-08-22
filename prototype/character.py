@@ -1,6 +1,7 @@
 from actions.action import Action
 from actions.move import MoveAction
 from actions.damage import DamageAction
+from actions.throw import ThrowAction
 from die import Die
 from grid import Map
 from fadingText import FadingText
@@ -13,7 +14,6 @@ class Character(SpriteSheetAnimation):
     # actions movement die in speed tokens out
     basic_actions = []
     def __init__(self, sheet="placeholder_character.png", name="default"):
-        self.range = 2
         self.action_pool = Die.create_pool(["d4", "d6", "d8", "d10"])
         self.tokens = {}
         self.actions = []
@@ -35,6 +35,10 @@ class Character(SpriteSheetAnimation):
         self.play_animation('walk_down')
         #self.health_bar = HealthBar(parent=self, x=.5,bar_color=color.lime.tint(-.25), roundness=.5, max_value=self.max_health, value=self.health)
 
+    @property
+    def range(self):
+        return 2
+    
     def register_hook(self, name, func):
         if name in self.hooks:
             self.hooks[name].append(func)
@@ -44,6 +48,9 @@ class Character(SpriteSheetAnimation):
     def fire_hook(self, name):
         for function in self.hooks.get(name, []):
             function()
+
+    def is_active_turn(self):
+        return Map.get_map().current_character == self
 
     def in_range(self, other, distance=None):
         if distance == None:
@@ -149,7 +156,7 @@ class Character(SpriteSheetAnimation):
         for action in self.actions:
             action.enabled = False 
         #build out top level menu of actions
-        self.actions = Character.get_basic_actions()
+        self.actions = self.get_basic_actions()
         if self.stance != None:
             self.actions += self.stance.get_actions()
 
@@ -193,31 +200,12 @@ class Character(SpriteSheetAnimation):
     def __str__(self):
         return self.name + "\n" + str(self.health) + "/" + str(self.max_health)
     
-    @classmethod 
-    def get_basic_actions(cls, ai=False):
-        if cls.basic_actions != [] and not ai: # TODO Horrible hack please fix this for ai characters
-            return cls.basic_actions 
-        move = MoveAction()
-        damage = DamageAction()
-        def do_throw(actor, die, targetHex):
-            if actor.parent.distance(targetHex) > 1: #throw has a fixed range
-                FadingText("out of range", targetHex, color.red)
-                return
-            if len(targetHex.children) == 0:
-                FadingText("No valid target", targetHex, color.red)
-                return
-            target = targetHex.children[0]
-            actor.push(target, die.value)
-            Map.targeting = None
-            die.consume()
-        def basic_throw(actor, die):
-            Map.targeting = {"actor": actor, "action": do_throw, "die": die, "range":1}
-        throw = Action("X",
-                       "Throw",
-                       "Choose an adjacent enemy or ally, and push them X spaces.",
-                       lambda actor: actor.has_dice() and Die.selected != None,
-                       basic_throw
-                       )
+    def get_basic_actions(self, ai=False):
+        if self.basic_actions != [] and not ai: # TODO Horrible hack please fix this for ai characters
+            return self.basic_actions 
+        move = MoveAction(self)
+        damage = DamageAction(self)
+        throw = ThrowAction(self)
         
         def do_grapple(actor, die, targetHex):
             if actor.parent.distance(targetHex) > actor.range:
@@ -230,14 +218,13 @@ class Character(SpriteSheetAnimation):
             actor.pull(target, die.value)
             Map.targeting = None
             die.consume()
-        def basic_grapple(actor, die):
-            Map.targeting = {"actor": actor, "action": do_grapple, "die": die}
+
         grapple = Action("X",
                        "Grapple",
                        "Choose an enemy or ally within range, and pull them X spaces towards you.",
-                       lambda actor: actor.has_dice() and Die.selected != None,
-                       basic_grapple
+                       self
                        )
+        grapple.confirm_targets = do_grapple
         
         def do_open(actor, die, targetHex):
             if targetHex.obstacle == None:
@@ -251,8 +238,6 @@ class Character(SpriteSheetAnimation):
             targetHex.clearObstacles(radius)
             Map.targeting = None
             die.consume()    
-        def basic_open(actor, die):
-            Map.targeting = {"actor": actor, "action": do_open, "die": die}
 
         open = Action("1+",
                       "Open the Path",
@@ -261,8 +246,9 @@ class Character(SpriteSheetAnimation):
                       4+: Also destroy Obstacles adjacent to it.
                       8+: Also destroy Obstacles adjacent to those.
                       """,
-                      lambda actor: actor.has_dice() and Die.selected != None,
-                      basic_open)
+                      self)
+        open.confirm_targets = do_open
+        
         def do_challenge(actor, die, targetHex):
             if actor.parent.distance(targetHex) > 4:
                 FadingText("out of range", targetHex, color.red)
@@ -274,13 +260,14 @@ class Character(SpriteSheetAnimation):
             target.add_tokens("challenge", 1) #TODO challenge tokens need to reference challenger
             Map.targeting = None 
             die.consume()
-        def basic_challenge(actor, die):
-            Map.targeting = {"actor": actor, "action": do_challenge, "die":die, "range":4}
+        
         challenger = Action("1+",
                             "A Challenger Approaches",
                             "Challenge an enemy within range 1-4.",
-                            lambda actor: actor.has_dice() and Die.selected != None,
-                            basic_challenge)
+                            self,
+                            range=4)
+        challenger.confirm_targets = do_challenge
+
         def do_douse(actor, die, targetHex):
             if actor.parent.distance(targetHex) > actor.range:
                 FadingText("out of range", targetHex, color.red)
@@ -319,8 +306,7 @@ class Character(SpriteSheetAnimation):
             token_list = ButtonList(token_dict, font='VeraMono.ttf', button_height=1.5, popup=0, clear_selected_on_enable=False)
             Map.targeting = None 
             die.consume()
-        def basic_douse(actor, die):
-            Map.targeting = {"actor": actor, "action": do_douse, "die":die}
+        
         douse = Action("2+",
                        "Put it Out!",
                        """
@@ -328,8 +314,9 @@ class Character(SpriteSheetAnimation):
                         4+: Remove another token.
                         7+: Remove another token.
                        """,
-                       lambda actor: actor.has_dice() and Die.selected != None and Die.selected.value >=2,
-                       basic_douse)
+                       self)
+        douse.confirm_targets = do_douse
+        
         def do_bring(actor, die, targetHex):
             if len(targetHex.children) == 0:
                 FadingText("No valid target", targetHex, color.red)
@@ -340,17 +327,17 @@ class Character(SpriteSheetAnimation):
                     targeted.add_tokens("challenge", 1)
                 Map.targeting = None
                 die.consume()
-                destroy(cls.confirm)
-            cls.confirm = Button("confirm targets", scale=(.3,.1), on_click=Func(challenge_targets))
-            cls.confirm.x = window.top_right.x-.17
+                destroy(self.confirm)
+            self.confirm = Button("confirm targets", scale=(.3,.1), on_click=Func(challenge_targets))
+            self.confirm.x = window.top_right.x-.17
             Map.targeting["targets"].append(target)
-        def basic_bring(actor, die):
-            Map.targeting = {"actor": actor, "action": do_bring, "die":die, "range": maxsize, "targets":[]}
         bringit = Action("4+",
                          "Bring it on!",
                          "Challenge any number of enemies you can see.",
-                         lambda actor: actor.has_dice() and Die.selected != None and Die.selected.value >=4,
-                         basic_bring)
+                         self,
+                         range=maxsize)
+        bringit.confirm_targets = do_bring
+
         def do_rescue(actor, die, targetHex):
             if len(targetHex.children) == 0:
                 FadingText("No valid target", targetHex, color.red)
@@ -363,37 +350,41 @@ class Character(SpriteSheetAnimation):
             target.heal(2)
             Map.targeting = None
             die.consume()
-        def basic_rescue(actor, die):
-            Map.targeting = {"actor": actor, "action": do_rescue, "die":die}
         rescue = Action("5+",
                         "Rescue",
                         "Pick an ally within range who's at 0 HP, and heal them. If they aren't in play, they return to play on the space of their choice.",
-                        lambda actor: actor.has_dice() and Die.selected != None and Die.selected.value >=5,
-                        basic_rescue)
+                        self)
+        rescue.confirm_targets = do_rescue
+        
         act = Action("",
                      "Act",
                      "Other basic actions",
-                     lambda actor: True,
-                     lambda actor, die: actor.set_actions([throw, grapple, open, challenger, douse, bringit, rescue]))
+                     self)
+        act.is_available = lambda: True
+        act.act = lambda die: act.actor.set_actions([throw, grapple, open, challenger, douse, bringit, rescue])
+        
         end = Action("",
                      "End Turn",
                      "End your turn",
-                     lambda actor: True,
-                     lambda actor, die: actor.end_turn())
+                     self)
+        end.is_available = lambda: True 
+        end.act = lambda die: end.actor.end_turn() 
+        # TODO should act and end be actions?
+        
         def basic_explore(actor, die):
             Map.get_map().explore()
             die.consume()
         explore = Action("1+",
                          "Explore",
                          "Explore what lies beyond visible borders. reveal more hexes at an edge.",
-                         lambda actor: actor.has_dice() and Die.selected != None,
-                         basic_explore)
+                         self)
+        explore.act = basic_explore
         #[throw, grapple, open, challenger, douse, bringit, rescue]
-        cls.basic_actions = [move, damage,explore, act, end]
+        self.basic_actions = [move, damage,explore, act, end]
         print(ai)
         if ai:
             return [move,damage,throw,grapple,open,challenger,douse,bringit,rescue]
-        return cls.basic_actions
+        return self.basic_actions
 
 
 

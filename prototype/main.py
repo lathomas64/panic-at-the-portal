@@ -5,6 +5,7 @@ from ursina.prefabs.splash_screen import SplashScreen
 import linecache
 import os
 import tracemalloc
+from actions.actor import Actor
 #trying to put everything sofar together
 
 def make_dummy(x,y):
@@ -14,6 +15,8 @@ def make_dummy(x,y):
     dummy.default_animation = "walk_left"
     dummy.state = dummy.fight
     map.turns.append(dummy)
+    hex = Map.get_map()[x,y]
+    print(hex.children)
 
 def display_top(snapshot, key_type='lineno', limit=3):
     snapshot = snapshot.filter_traces((
@@ -48,16 +51,16 @@ def input(key):
 if __name__ == "__main__":
     tracemalloc.start()
     app = Ursina()
-    map = Map.create_map(0)
+    map = Map.create_map(5)
     player = Character(name="player")
     player.parent = map[(0,0)]
     map.turns = [player]
-    map.add(2,0)
+    map.explore_hex(2,0)
     a = Animation("fire",fps=8, parent=map[(2,0)])
-    map.add(4,0)
+    map.explore_hex(4,0)
     make_dummy(4,0)
     #make_dummy(0,0)
-    map.add(-2,2)
+    map.explore_hex(-2,2)
     make_dummy(-2,2)
     print("before advance turn", map.current_character)
     map.advance_turn()
@@ -65,5 +68,7 @@ if __name__ == "__main__":
     #window.fullscreen = True
     splash = SplashScreen()
     Sprite("background", z=1)
+
+    print("is Character an actor?", issubclass(Character, Actor))
   
     app.run()

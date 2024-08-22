@@ -4,7 +4,7 @@ from fadingText import FadingText
 from ursina import color # TODO fold color from fading Text into fading text
 
 class DamageAction(Action):
-    def __init__(self):
+    def __init__(self, actor):
         super().__init__("1+", 
                "damage", 
                 """
@@ -13,14 +13,16 @@ class DamageAction(Action):
                     5+: Deal 3 damage instead, and push them 1 space away.
                     7+: Deal 4 damage instead, and push them 1 more space.
                     9+: Deal 5 damage instead, and push them 1 more space.
-                """)
+                """,
+                actor)
 
-    def confirm_target(self, actor, die, targetHex):
+    def confirm_targets(self, actor, die, targetHex):
         print(actor, die, targetHex)
         print(targetHex.children)
         if len(targetHex.children) == 0:
             FadingText("No valid target", targetHex, color.red)
             return
+        print(actor, actor.parent)
         if actor.parent.distance(targetHex) > actor.range:
             FadingText("out of range", targetHex, color.red)
             return
@@ -51,4 +53,5 @@ class DamageAction(Action):
         die.consume()
     
     def act(self,actor, die):
-        Map.targeting = {"actor":actor, "action":self.confirm_target, "die":die}
+        print("damage act:",actor,die)
+        Map.targeting = {"actor":actor, "action":self.confirm_targets, "die":die}
