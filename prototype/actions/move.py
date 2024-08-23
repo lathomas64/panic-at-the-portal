@@ -7,6 +7,6 @@ class MoveAction(Action):
                "Gain X speed tokens",
                actor)
 
-    def act(self,actor, die):
-        actor.add_tokens("speed", die.value)
+    def act(self, die):
+        self.actor.add_tokens("speed", die.value)
         die.consume()
