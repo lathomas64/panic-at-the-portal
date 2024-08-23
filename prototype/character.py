@@ -3,12 +3,16 @@ from actions.move import MoveAction
 from actions.damage import DamageAction
 from actions.throw import ThrowAction
 from actions.grapple import GrappleAction
+from actions.open import OpenAction
+from actions.douse import DouseAction
+from actions.bring import BringAction
+from actions.rescue import RescueAction
+from actions.challenge import ChallengeAction
 from die import Die
 from grid import Map
 from fadingText import FadingText
 from ursina import SpriteSheetAnimation, window, color, time, destroy, Func, Button
 from sys import maxsize
-from ursina.prefabs.button_list import ButtonList
 #from ursina.prefabs.health_bar import HealthBar
 
 class Character(SpriteSheetAnimation):
@@ -208,136 +212,11 @@ class Character(SpriteSheetAnimation):
         damage = DamageAction(self)
         throw = ThrowAction(self)
         grapple = GrappleAction(self)
-        
-        def do_open(actor, die, targetHex):
-            if targetHex.obstacle == None:
-                FadingText("No Obstacles here", targetHex, color.red)
-                return 
-            radius = 0
-            if die.value >= 8:
-                radius = 2
-            elif die.value >= 4:
-                radius = 1
-            targetHex.clearObstacles(radius)
-            Map.targeting = None
-            die.consume()    
-
-        open = Action("1+",
-                      "Open the Path",
-                      """
-                      Destroy one Obstacle within range.
-                      4+: Also destroy Obstacles adjacent to it.
-                      8+: Also destroy Obstacles adjacent to those.
-                      """,
-                      self)
-        open.confirm_targets = do_open
-        
-        def do_challenge(actor, die, targetHex):
-            if actor.parent.distance(targetHex) > 4:
-                FadingText("out of range", targetHex, color.red)
-                return
-            if len(targetHex.children) == 0:
-                FadingText("No valid target", targetHex, color.red)
-                return
-            target = targetHex.children[0]
-            target.add_tokens("challenge", 1) #TODO challenge tokens need to reference challenger
-            Map.targeting = None 
-            die.consume()
-        
-        challenger = Action("1+",
-                            "A Challenger Approaches",
-                            "Challenge an enemy within range 1-4.",
-                            self,
-                            range=4)
-        challenger.confirm_targets = do_challenge
-
-        def do_douse(actor, die, targetHex):
-            if actor.parent.distance(targetHex) > actor.range:
-                FadingText("out of range", targetHex, color.red)
-                return
-            if len(targetHex.children) == 0:
-                FadingText("No valid target", targetHex, color.red)
-                return
-            target = targetHex.children[0]
-            tokenCount = 1
-            if die.value >= 7:
-                tokenCount = 3
-            elif die.value >= 4:
-                tokenCount = 2
-            cls.tokenCount = tokenCount #temporary variable to allow tokenCount to be accessible inside decrement
-            def decrement_tokens(token_type):
-                target.spend_tokens(token_type, 1)
-                print(target.tokens)
-                cls.tokenCount -= 1
-                if target.get_tokens(token_type) <= 0:
-                    print("does this fire?")
-                    del token_dict[token_type]
-                    token_list.button_dict = token_dict
-                if cls.tokenCount == 0:
-                    destroy(token_list)
-                if len(token_dict) <= 0:
-                    destroy(token_list)
-
-            token_dict = {}
-            for token_type in target.tokens.keys():
-                if target.get_tokens(token_type) > 0:
-                    token_dict[token_type] = Func(decrement_tokens, token_type)
-            print(token_dict)
-            if len(token_dict) <= 0:
-                FadingText("No Tokens to remove", targetHex, color.red)
-                return
-            token_list = ButtonList(token_dict, font='VeraMono.ttf', button_height=1.5, popup=0, clear_selected_on_enable=False)
-            Map.targeting = None 
-            die.consume()
-        
-        douse = Action("2+",
-                       "Put it Out!",
-                       """
-                        Remove one token from someone in range.
-                        4+: Remove another token.
-                        7+: Remove another token.
-                       """,
-                       self)
-        douse.confirm_targets = do_douse
-        
-        def do_bring(actor, die, targetHex):
-            if len(targetHex.children) == 0:
-                FadingText("No valid target", targetHex, color.red)
-                return
-            target = targetHex.children[0]
-            def challenge_targets():
-                for targeted in Map.targeting["targets"]:
-                    targeted.add_tokens("challenge", 1)
-                Map.targeting = None
-                die.consume()
-                destroy(self.confirm)
-            self.confirm = Button("confirm targets", scale=(.3,.1), on_click=Func(challenge_targets))
-            self.confirm.x = window.top_right.x-.17
-            Map.targeting["targets"].append(target)
-        bringit = Action("4+",
-                         "Bring it on!",
-                         "Challenge any number of enemies you can see.",
-                         self,
-                         range=maxsize)
-        bringit.confirm_targets = do_bring
-
-        def do_rescue(actor, die, targetHex):
-            if len(targetHex.children) == 0:
-                FadingText("No valid target", targetHex, color.red)
-                return
-            target = targetHex.children[0]
-            if target.health > 0:
-                FadingText("Target is not down", targetHex, color.red)
-                return
-            # TODO check if they are an ally, list for out of play allies 
-            target.heal(2)
-            Map.targeting = None
-            die.consume()
-        rescue = Action("5+",
-                        "Rescue",
-                        "Pick an ally within range who's at 0 HP, and heal them. If they aren't in play, they return to play on the space of their choice.",
-                        self)
-        rescue.confirm_targets = do_rescue
+        open = OpenAction(self)
+        challenger = ChallengeAction(self)
+        douse = DouseAction(self)
+        bringit = BringAction(self)
+        rescue = RescueAction(self)
         
         act = Action("",
                      "Act",
