@@ -1,9 +1,6 @@
 from ursina import *
-from sys import maxsize
 
 class Map(Entity):
-    hexes = {}
-    turns = []
     targeting = None
     current_character = None
     pan_speed = 5
@@ -13,6 +10,8 @@ class Map(Entity):
     instance = None
     def __init__(self, radius, **kwargs):
         super().__init__(parent=camera.ui,scale=.1, z=100,kwargs=kwargs)
+        self.hexes = {}
+        self.turns = []
         if radius != None:
             for q in range(-radius, radius+1):
                 for r in range(-radius, radius+1):
@@ -49,19 +48,19 @@ class Map(Entity):
     def input(self, key):
         if key == "a" or key == "a hold":
             self.x += self.pan_speed * time.dt
-        if key == "d" or key == "d hold":
+        elif key == "d" or key == "d hold":
             self.x -= self.pan_speed * time.dt
-        if key == "w" or key == "w hold":
+        elif key == "w" or key == "w hold":
             self.y -= self.pan_speed * time.dt
-        if key == "s" or key == "s hold":
+        elif key == "s" or key == "s hold":
             self.y += self.pan_speed * time.dt
-        if key == "scroll up":
+        elif key == "scroll up":
             self.scale += Vec3(self.zoom_speed * time.dt)
             self.scale = min(self.scale, self.max_zoom)
-        if key == "scroll down":
+        elif key == "scroll down":
             self.scale -= Vec3(self.zoom_speed * time.dt)
             self.scale = max(self.scale, self.min_zoom)
-        if key == "escape":
+        elif key == "escape":
             print(key, self.targeting, self.current_character)
             if self.targeting == None and self.current_character != None:
                 self.current_character.get_actions()
@@ -92,14 +91,6 @@ class Hex(Entity):
     base_color = color.white 
     hover_color = color.gray
     move_cost = -1
-    directions = {
-        "northeast":(0,1),
-        "east" : (1,0),
-        "southeast" : (1,-1),
-        "northwest" : (-1,1),
-        "west" : (-1,0),
-        "southwest" : (0,-1)
-    }
 
     def __init__(self, q,r, **kwargs):
         self.obstacle = None
@@ -109,12 +100,25 @@ class Hex(Entity):
         scale = 1
         x_offset = (q + r/2) * scale
         y_offset = (r * .75) * scale
+        self.directions = {
+        "northeast":(0,1),
+        "east" : (1,0),
+        "southeast" : (1,-1),
+        "northwest" : (-1,1),
+        "west" : (-1,0),
+        "southwest" : (0,-1)
+        }
         super().__init__(parent=kwargs["parent"],scale=scale,x=x_offset, y=y_offset, model='quad',collider='box', texture=load_texture("hexbordered.png"), kwargs=kwargs)
         self.map = self.parent
         self.on_click = self.clicked
         self.tooltip = Tooltip(str((q,r))+"::"+str(abs(q+r))+"::"+str(max(abs(q),abs(r))))
         if random.random() < .3:
-            self.addRubble()
+            #self.addRubble()
+            self.addObstacle(random.choice(["rubble", "edge", "wall", "fog"]))
+
+    def addObstacle(self, obstacle_type):
+        self.obstacle = obstacle_type
+        self.texture = load_texture(f"hex{obstacle_type}.png")
 
     def addRubble(self):
         self.obstacle = "rubble"
@@ -139,14 +143,8 @@ class Hex(Entity):
         return max([abs(q+r), abs(q), abs(r)])
     
     def neighbors(self):
-        result = []
-        for q in range(self.q-1,self.q+2):
-            for r in range(self.r-1,self.r+2):
-                if (q,r) == (self.q,self.r):
-                    continue # don't count myself as a neighbor
-                if (q,r) in Map.get_map() and abs(q-self.q+r-self.r) <= 1:
-                    result.append(Map.get_map()[(q,r)])
-        return result
+        neighbor_coords = [(self.q + d[0], self.r + d[1]) for d in self.directions.values()]
+        return [self.map[(q, r)] for q, r in neighbor_coords if (q, r) in self.map]
 
     def update(self):
         if self.rotation != (0,0,0):
@@ -156,8 +154,8 @@ class Hex(Entity):
             #self.move_cost = self.distance(self.map.current_character.parent)
             if self.map.current_character in self.children:
                 self.texture = load_texture("hexcurrent.png")
-            elif self.obstacle == "rubble":
-                self.texture = load_texture("hexrubble.png")
+            elif self.obstacle is not None:
+                self.texture = load_texture(f"hex{self.obstacle}.png")
             else:
                 self.texture = load_texture("hexbordered.png")
         else:
