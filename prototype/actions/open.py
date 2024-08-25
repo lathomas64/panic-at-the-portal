@@ -24,6 +24,6 @@ class OpenAction(Action):
         elif die.value >= 4:
             radius = 1
         targetHex.clearObstacles(radius)
-        Map.targeting = None
+        Map.get_map().targeting = None
         die.consume() 
     
