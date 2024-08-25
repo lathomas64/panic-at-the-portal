@@ -1,5 +1,5 @@
 from actions.action import Action
-from grid import Map
+from hud import ui
 from fadingText import FadingText
 from ursina import color
 
@@ -20,5 +20,5 @@ class ChallengeAction(Action):
             return
         target = targetHex.children[0]
         target.add_tokens("challenge", 1) #TODO challenge tokens need to reference challenger
-        Map.targeting = None 
+        ui.map.targeting = None 
         die.consume()

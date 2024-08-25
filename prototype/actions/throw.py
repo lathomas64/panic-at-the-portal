@@ -1,5 +1,5 @@
 from actions.action import Action
-from grid import Map
+from hud import ui
 from fadingText import FadingText
 from ursina import color
 
@@ -21,6 +21,6 @@ class ThrowAction(Action):
             return
         target = targetHex.children[0]
         actor.push(target, die.value)
-        Map.targeting = None
+        ui.map.targeting = None
         die.consume()
     

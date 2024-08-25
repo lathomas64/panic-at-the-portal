@@ -7,7 +7,7 @@ class Map(Entity):
     zoom_speed = 1
     max_zoom = .5
     min_zoom = .05
-    instance = None
+    current_map = None
     def __init__(self, radius, **kwargs):
         super().__init__(parent=camera.ui,scale=.1, z=100,kwargs=kwargs)
         self.hexes = {}
@@ -77,13 +77,8 @@ class Map(Entity):
 
     @classmethod
     def create_map(cls, radius=None):
-        cls.instance = Map(radius)
-        Hex.map = cls.instance
-        return cls.instance
-    
-    @classmethod
-    def get_map(cls):
-        return cls.instance
+        map = Map(radius)
+        return map
 
 
 class Hex(Entity):
@@ -108,7 +103,7 @@ class Hex(Entity):
         "west" : (-1,0),
         "southwest" : (0,-1)
         }
-        super().__init__(parent=kwargs["parent"],scale=scale,x=x_offset, y=y_offset, model='quad',collider='box', texture=load_texture("hexbordered.png"), kwargs=kwargs)
+        super().__init__(scale=scale,x=x_offset, y=y_offset, model='quad',collider='box', texture=load_texture("hexbordered.png"), **kwargs)
         self.map = self.parent
         self.on_click = self.clicked
         self.tooltip = Tooltip(str((q,r))+"::"+str(abs(q+r))+"::"+str(max(abs(q),abs(r))))
@@ -195,7 +190,7 @@ class Hex(Entity):
         if(self.empty() and (self.map.current_character != None) and self.move_cost <= self.map.current_character.get_tokens("speed")):
             self.map.current_character.parent = self
             self.map.current_character.spend_tokens("speed", self.move_cost)
-            [hex.__setattr__("move_cost",-1) for hex in Map.get_map().hexes.values()]
+            [hex.__setattr__("move_cost",-1) for hex in self.map.hexes.values()]
             self.move_cost = 0
             self.flood_move_cost()
     

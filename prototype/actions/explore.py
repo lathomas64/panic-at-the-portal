@@ -1,5 +1,5 @@
 from actions.action import Action
-from grid import Map
+from hud import ui
 
 class ExploreAction(Action):
     def __init__(self, actor):
@@ -10,5 +10,5 @@ class ExploreAction(Action):
                          range=4)
 
     def act(self, die):
-        Map.get_map().explore()
+        ui.map.explore()
         die.consume()

@@ -10,9 +10,9 @@ from actions.rescue import RescueAction
 from actions.challenge import ChallengeAction
 from actions.explore import ExploreAction
 from die import Die
-from grid import Map
 from fadingText import FadingText
 from ursina import SpriteSheetAnimation, window, color, time
+from hud import ui
 #from ursina.prefabs.health_bar import HealthBar
 
 class Character(SpriteSheetAnimation):
@@ -55,7 +55,7 @@ class Character(SpriteSheetAnimation):
             function()
 
     def is_active_turn(self):
-        return Map.get_map().current_character == self
+        return ui.map.current_character == self
 
     def in_range(self, other, distance=None):
         if distance == None:
@@ -113,8 +113,8 @@ class Character(SpriteSheetAnimation):
                     destination_r += 1
                 else:
                     destination_r -= 1
-            if (destination_q, destination_r) in Map.get_map():
-                target.parent = Map.get_map()[destination_q, destination_r]
+            if (destination_q, destination_r) in ui.map:
+                target.parent = ui.map[destination_q, destination_r]
             #should we have an else?
         #TODO handle ringout if their final destination is outside the map.
 
@@ -198,7 +198,7 @@ class Character(SpriteSheetAnimation):
             die.enabled = False 
         for action in self.actions:
             action.enabled = False 
-        Map.get_map().advance_turn()
+        ui.map.advance_turn()
     
     def __del__(self):
         print("character deleted...")
@@ -292,7 +292,7 @@ class AICharacter(Character):
             target = nearby[0]
             action = self.get_action("Damage")
             action.act(self, die)
-            Map.get_map().targeting["action"](self, die, target.parent)
+            ui.map.targeting["action"](self, die, target.parent)
             return
         elif len(self.enemies_in_range(4)) > 0:
             challengable = self.enemies_in_range(4)
@@ -300,7 +300,7 @@ class AICharacter(Character):
             target = challengable[0]
             action = self.get_action("A Challenger Approaches")
             action.act(self,die)
-            Map.get_map().targeting["action"](self, die, target.parent)
+            ui.map.targeting["action"](self, die, target.parent)
             return
         elif len(self.find_enemies()) > 0 and len(self.available_dice(4)) > 0:
             enemies = self.find_enemies()
@@ -308,14 +308,14 @@ class AICharacter(Character):
             target = enemies[0]
             action = self.get_action("Bring it on!")
             action.act(self,die)
-            [Map.get_map().targeting["action"](self, die,enemy.parent) for enemy in enemies]
+            [ui.map.targeting["action"](self, die,enemy.parent) for enemy in enemies]
             Action.confirm.on_click()
             return
         # if we get here there's no action we can take
         self.wait_function = self.end_turn
 
     def find_enemies(self):
-        return [character for character in Map.get_map().turns if character.team == None or character.team != self.team]
+        return [character for character in ui.map.turns if character.team == None or character.team != self.team]
     
     def start_turn(self):
         print("AICharacter start turn...")
@@ -337,7 +337,7 @@ class AICharacter(Character):
             self.state = self.end_turn
         elif self.state == self.end_turn and self.health > 0:
             self.state = self.default_state
-        if Map.get_map().current_character == self:
+        if ui.map.current_character == self:
             if self.wait_time > 0 and self.wait_function != None:
                 self.wait_time -= time.dt
                 if self.wait_time <= 0:

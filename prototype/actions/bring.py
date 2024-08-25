@@ -1,5 +1,5 @@
 from actions.action import Action
-from grid import Map
+from hud import ui
 from fadingText import FadingText
 from ursina import color, Button, window, destroy, Func
 from sys import maxsize
@@ -18,11 +18,11 @@ class BringAction(Action):
             return
         target = targetHex.children[0]
         def challenge_targets():
-            for targeted in Map.targeting["targets"]:
+            for targeted in ui.map.targeting["targets"]:
                 targeted.add_tokens("challenge", 1)
-            Map.targeting = None
+            ui.map.targeting = None
             die.consume()
             destroy(self.confirm)
         self.confirm = Button("confirm targets", scale=(.3,.1), on_click=Func(challenge_targets))
         self.confirm.x = window.top_right.x-.17
-        Map.targeting["targets"].append(target)
+        ui.map.targeting["targets"].append(target)

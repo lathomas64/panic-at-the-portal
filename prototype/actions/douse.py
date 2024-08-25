@@ -1,5 +1,5 @@
 from actions.action import Action
-from grid import Map
+from hud import ui
 from fadingText import FadingText
 from ursina import color, destroy, Func 
 from ursina.prefabs.button_list import ButtonList
@@ -52,5 +52,5 @@ class DouseAction(Action):
             FadingText("No Tokens to remove", targetHex, color.red)
             return
         token_list = ButtonList(token_dict, font='VeraMono.ttf', button_height=1.5, popup=0, clear_selected_on_enable=False)
-        Map.targeting = None 
+        ui.map.targeting = None 
         die.consume()

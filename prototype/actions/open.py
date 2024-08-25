@@ -1,5 +1,5 @@
 from actions.action import Action
-from grid import Map
+from hud import ui
 from fadingText import FadingText
 from ursina import color
 
@@ -24,6 +24,6 @@ class OpenAction(Action):
         elif die.value >= 4:
             radius = 1
         targetHex.clearObstacles(radius)
-        Map.get_map().targeting = None
+        ui.map.targeting = None
         die.consume() 
     
