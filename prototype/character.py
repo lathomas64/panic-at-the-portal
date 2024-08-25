@@ -8,11 +8,11 @@ from actions.douse import DouseAction
 from actions.bring import BringAction
 from actions.rescue import RescueAction
 from actions.challenge import ChallengeAction
+from actions.explore import ExploreAction
 from die import Die
 from grid import Map
 from fadingText import FadingText
-from ursina import SpriteSheetAnimation, window, color, time, destroy, Func, Button
-from sys import maxsize
+from ursina import SpriteSheetAnimation, window, color, time
 #from ursina.prefabs.health_bar import HealthBar
 
 class Character(SpriteSheetAnimation):
@@ -233,14 +233,7 @@ class Character(SpriteSheetAnimation):
         end.act = lambda die: end.actor.end_turn() 
         # TODO should act and end be actions?
         
-        def basic_explore(actor, die):
-            Map.get_map().explore()
-            die.consume()
-        explore = Action("1+",
-                         "Explore",
-                         "Explore what lies beyond visible borders. reveal more hexes at an edge.",
-                         self)
-        explore.act = basic_explore
+        explore = ExploreAction(self)
         #[throw, grapple, open, challenger, douse, bringit, rescue]
         self.basic_actions = [move, damage,explore, act, end]
         print(ai)
