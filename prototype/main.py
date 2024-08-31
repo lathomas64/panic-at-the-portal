@@ -29,10 +29,8 @@ if __name__ == "__main__":
     print("before advance turn", ui.map.current_character)
     ui.map.advance_turn()
     print("after advance turn", ui.map.current_character)
-    #window.fullscreen = True
+    window.fullscreen = True
     splash = SplashScreen()
     Sprite("background", z=1)
-
-    print("is Character an actor?", issubclass(Character, Actor))
   
     ui.run()

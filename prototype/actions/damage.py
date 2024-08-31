@@ -6,7 +6,7 @@ from ursina import color # TODO fold color from fading Text into fading text
 class DamageAction(Action):
     def __init__(self, actor):
         super().__init__("1+", 
-               "damage", 
+               "Damage", 
                 """
                 Deal 1 damage to one enemy in your range
                     3+: Deal 2 damage instead.

@@ -179,6 +179,13 @@ class Character(SpriteSheetAnimation):
             action.y = .3 - .1125 * index
             action.enabled = True
 
+    @property
+    def enemies(self):
+        return [character for character in ui.map.turns if character.team == None or character.team != self.team]
+
+    @property
+    def allies(self):
+        return [character for character in ui.map.turns if character.team == self.team]
 
     def start_turn(self):
         # anything else at start of turn
@@ -249,8 +256,8 @@ class AICharacter(Character):
     wait_function = None
 
     def get_action(self, name):
-        print(name, Character.get_basic_actions(True))
-        for action in Character.get_basic_actions(True):
+        print(name, self.get_basic_actions(True))
+        for action in self.get_basic_actions(True):
             if action.name == name:
                 return action
         return None
@@ -264,7 +271,7 @@ class AICharacter(Character):
     def enemies_in_range(self, distance=None):
         if distance == None:
             distance = self.range
-        return [character for character in self.find_enemies() if self.in_range(character, distance)]
+        return [character for character in self.enemies if self.in_range(character, distance)]
 
     def freeze(self):
         FadingText(self.name + " Freezes in panic",self.parent, color.black, 1)
@@ -291,7 +298,8 @@ class AICharacter(Character):
             die = self.available_dice()[0]
             target = nearby[0]
             action = self.get_action("Damage")
-            action.act(self, die)
+            print("damage action:", action)
+            action.act(die)
             ui.map.targeting["action"](self, die, target.parent)
             return
         elif len(self.enemies_in_range(4)) > 0:
@@ -299,28 +307,24 @@ class AICharacter(Character):
             die = self.available_dice()[0]
             target = challengable[0]
             action = self.get_action("A Challenger Approaches")
-            action.act(self,die)
+            action.act(die)
             ui.map.targeting["action"](self, die, target.parent)
             return
-        elif len(self.find_enemies()) > 0 and len(self.available_dice(4)) > 0:
-            enemies = self.find_enemies()
+        elif len(self.enemies) > 0 and len(self.available_dice(4)) > 0:
             die = self.available_dice(4)[0]
-            target = enemies[0]
+            target = self.enemies[0]
             action = self.get_action("Bring it on!")
-            action.act(self,die)
-            [ui.map.targeting["action"](self, die,enemy.parent) for enemy in enemies]
-            Action.confirm.on_click()
+            action.act(die)
+            [ui.map.targeting["action"](self, die,enemy.parent) for enemy in self.enemies]
+            action.confirm.on_click()
             return
         # if we get here there's no action we can take
         self.wait_function = self.end_turn
-
-    def find_enemies(self):
-        return [character for character in ui.map.turns if character.team == None or character.team != self.team]
     
     def start_turn(self):
         print("AICharacter start turn...")
         super().start_turn()
-        print("enemies:", self.find_enemies())
+        print("enemies:", self.enemies)
         if self.state == None:
             self.state = self.freeze
         self.wait_time = 1

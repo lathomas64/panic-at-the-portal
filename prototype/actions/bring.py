@@ -6,9 +6,9 @@ from sys import maxsize
 
 class BringAction(Action):
     def __init__(self, actor):
-        super().__init__("1+",
-                         "A Challenger Approaches",
-                         "Challenge an enemy within range 1-4.",
+        super().__init__("5+",
+                         "Bring it on!",
+                         "Challenge any number of enemies within line of sight",
                          actor,
                          range=maxsize)
 
