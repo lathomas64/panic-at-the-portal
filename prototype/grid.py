@@ -69,6 +69,7 @@ class Map(Entity):
                 self.targeting = None
     
     def advance_turn(self):
+        self.targeting = None #stop gap end any targeting we were trying to do
         if self.current_character != None: #skip this if we haven't done a turn yet
             self.turns.remove(self.current_character)
             self.turns.append(self.current_character)
