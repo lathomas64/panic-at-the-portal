@@ -19,10 +19,17 @@ class BringAction(Action):
         target = targetHex.children[0]
         def challenge_targets():
             for targeted in ui.map.targeting["targets"]:
-                targeted.add_tokens("challenge", 1)
+                actor.challenge(targeted)
             ui.map.targeting = None
             die.consume()
-            destroy(self.confirm)
-        self.confirm = Button("confirm targets", scale=(.3,.1), on_click=Func(challenge_targets))
-        self.confirm.x = window.top_right.x-.17
+            self.confirm.disable()
+
+        if not hasattr(self, "confirm"): # don't add button again if we already added it
+            self.confirm = Button("confirm targets", scale=(.3,.1), on_click=Func(challenge_targets))
+            self.confirm.x = window.top_right.x-.1
+        else:
+            print("reenabling confirm button")
+            self.confirm.enable()
+            self.confirm.on_click = Func(challenge_targets)
+            self.confirm.x = window.top_right.x-.1
         ui.map.targeting["targets"].append(target)

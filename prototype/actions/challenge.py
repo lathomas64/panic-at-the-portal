@@ -19,6 +19,7 @@ class ChallengeAction(Action):
             FadingText("No valid target", targetHex, color.red)
             return
         target = targetHex.children[0]
-        target.add_tokens("challenge", 1) #TODO challenge tokens need to reference challenger
+        actor.challenge(target)
         ui.map.targeting = None 
         die.consume()
+        
