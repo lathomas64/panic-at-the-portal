@@ -9,7 +9,7 @@ from actions.bring import BringAction
 from actions.rescue import RescueAction
 from actions.challenge import ChallengeAction
 from actions.explore import ExploreAction
-from archetypes.angel import Angel
+
 from die import Die
 from fadingText import FadingText
 from ursina import SpriteSheetAnimation, window, color, time
@@ -39,7 +39,6 @@ class Character(SpriteSheetAnimation):
         })
         self.name = name
         self.play_animation('walk_down')
-        self.archetype = Angel(self)
         self.challengers = []
         #self.health_bar = HealthBar(parent=self, x=.5,bar_color=color.lime.tint(-.25), roundness=.5, max_value=self.max_health, value=self.health)
 

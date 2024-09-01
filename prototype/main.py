@@ -1,8 +1,8 @@
 from ursina import *
 from character import Character, AICharacter
 from ursina.prefabs.splash_screen import SplashScreen
-from actions.actor import Actor
 from hud import ui
+from archetypes.angel import Angel
 #trying to put everything sofar together
 
 def make_dummy(x,y):
@@ -17,6 +17,7 @@ def make_dummy(x,y):
 
 if __name__ == "__main__":
     player = Character(name="player")
+    player.archetype = Angel(player) 
     player.parent = ui.map[(0,0)]
     ui.map.turns = [player]
     ui.map.explore_hex(2,0)
