@@ -1,7 +1,7 @@
 import unittest
 import sys, os 
 sys.path.append(os.path.abspath('..'))
-from prototype.form import Form
+from prototype.forms.form import Form
 
 class TestForm(unittest.TestCase):
 
