@@ -141,7 +141,11 @@ class Character(SpriteSheetAnimation):
         else:
             self.tokens[tokenType] = tokenAmount
     
-    def spend_tokens(self, tokenType: str, tokenAmount:int):
+    def discard_tokens(self, tokenType: str, tokenAmount:int=1):
+        self.spend_tokens(tokenType, tokenAmount)
+        self.fire_hook("discard_token")
+    
+    def spend_tokens(self, tokenType: str, tokenAmount:int=1):
         FadingText("-"+str(tokenAmount) + " " + tokenType, self, color.red)
         if tokenType not in self.tokens:
             return

@@ -11,6 +11,7 @@ class Hud(Entity):
         self.maps["world"] = self.current_map
         self.action_dict = {}
         self.turns = []
+        self.lists = {}
     
     def display_actions(self):
         self.action_list = ButtonList(self.action_dict,
@@ -47,6 +48,17 @@ class Hud(Entity):
 
     def run(self):
         self.app.run()
+    
+    def run_then_destroy(self, func, entity):
+        func()
+        destroy(entity)
+    
+    def display_list(self, name, options, function=print):
+        button_dict = {}
+        self.lists[name] = ButtonList(button_dict, font='VeraMono.ttf', button_height=1.5, popup=0, clear_selected_on_enable=False)
+        for option in options:
+            button_dict[option] = Func(self.run_then_destroy, Func(function, option), self.lists[name])
+        self.lists[name].button_dict = button_dict
     
     def game_over(self):
         print("***\n\nGame Over!\n\n***")

@@ -35,7 +35,6 @@ class DouseAction(Action):
             print(target.tokens)
             self.tokenCount -= 1
             if target.get_tokens(token_type) <= 0:
-                print("does this fire?")
                 del token_dict[token_type]
                 token_list.button_dict = token_dict
             if self.tokenCount == 0:
