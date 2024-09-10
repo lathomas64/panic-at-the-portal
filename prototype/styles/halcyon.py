@@ -3,7 +3,7 @@ from actions.purify import PurifyAction
 from hud import ui
 from ursina import Func
 
-class Halcyon(Style):
+class HalcyonStyle(Style):
     def __init__(self, character):
         super().__init__(character)
         self.range = 2

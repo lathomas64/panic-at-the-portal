@@ -3,7 +3,7 @@ from character import Character, AICharacter
 from ursina.prefabs.splash_screen import SplashScreen
 from hud import ui
 from archetypes.angel import Angel
-from styles.halcyon import Halcyon
+from styles.halcyon import HalcyonStyle
 #trying to put everything sofar together
 
 def make_dummy(x,y):
@@ -19,7 +19,7 @@ def make_dummy(x,y):
 if __name__ == "__main__":
     player = Character(name="player")
     player.archetype = Angel(player) 
-    player.style = Halcyon(player) #TODO this should be through a stance not standalone
+    player.style = HalcyonStyle(player) #TODO this should be through a stance not standalone
     player.style.on_equip()
     player.parent = ui.map[(0,0)]
     ui.map.turns = [player]
@@ -36,5 +36,8 @@ if __name__ == "__main__":
     window.fullscreen = True
     splash = SplashScreen()
     Sprite("background", z=1)
+    
   
     ui.run()
+    print("\n\ndoes after run happen?\n\n")
+    ui.game_active = True
