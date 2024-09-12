@@ -15,7 +15,7 @@ from actions.challenge import ChallengeAction
 from actions.explore import ExploreAction
 
 from die import Die
-from fadingText import FadingText
+from prototype.fading_text import FadingText
 from hud import UI
 #from ursina.prefabs.health_bar import HealthBar
 

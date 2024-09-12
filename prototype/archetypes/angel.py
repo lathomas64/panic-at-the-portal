@@ -1,7 +1,7 @@
 from archetypes.archetype import Archetype
 from ursina import color
 from hud import UI
-from fadingText import FadingText
+from prototype.fading_text import FadingText
 
 class Angel(Archetype):
     

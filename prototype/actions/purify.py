@@ -1,6 +1,6 @@
 from actions.action import Action
 from hud import UI
-from fadingText import FadingText
+from prototype.fading_text import FadingText
 from ursina import color, destroy, Func 
 from ursina.prefabs.button_list import ButtonList
 
