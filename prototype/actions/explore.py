@@ -7,7 +7,7 @@ class ExploreAction(Action):
                          "Explore",
                          "Explore what lies beyond visible borders. reveal more hexes at an edge.",
                          actor,
-                         range=4)
+                         action_range=4)
 
     def act(self, die):
         UI.game_map.explore()

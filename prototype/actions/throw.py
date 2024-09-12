@@ -9,7 +9,7 @@ class ThrowAction(Action):
                "Throw", 
                "Choose an adjacent enemy or ally, and push them X spaces.",
                actor,
-               range=1)
+               action_range=1)
 
     def confirm_targets(self, actor, die, targetHex):
         print(targetHex, targetHex.children)

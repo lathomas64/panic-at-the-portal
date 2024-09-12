@@ -10,7 +10,7 @@ class BringAction(Action):
                          "Bring it on!",
                          "Challenge any number of enemies within line of sight",
                          actor,
-                         range=maxsize)
+                         action_range=maxsize)
 
     def confirm_targets(self, actor, die, targetHex):
         if len(targetHex.children) == 0:

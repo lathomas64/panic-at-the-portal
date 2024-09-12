@@ -9,7 +9,7 @@ class ChallengeAction(Action):
                          "A Challenger Approaches",
                          "Challenge an enemy within range 1-4.",
                          actor,
-                         range=4)
+                         action_range=4)
 
     def confirm_targets(self, actor, die, targetHex):
         if actor.parent.distance(targetHex) > 4:
