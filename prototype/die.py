@@ -80,8 +80,7 @@ class Die(Entity):
         for index, size in enumerate(dice):
             die = Die(size)
             die.x = window.top_left.x
-            die.x += (.5 + Die.left_margin + index + Die.left_margin*index)
-            die.x *= .075
+            die.x += (.5 + Die.left_margin + index + Die.left_margin*index) * .075
             die.y = 6 * die.scale.y
             results.append(die)
         return results
