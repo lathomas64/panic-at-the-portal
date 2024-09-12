@@ -1,6 +1,6 @@
 from styles.style import Style 
 from actions.purify import PurifyAction
-from hud import ui
+from hud import UI
 from ursina import Func
 
 class HalcyonStyle(Style):
@@ -10,7 +10,7 @@ class HalcyonStyle(Style):
     
     def drop_token(self): # prompt to lose a token look at douse
         token_list = [token_type for token_type in self.actor.tokens.keys() if self.actor.get_tokens(token_type) > 0]
-        ui.display_list("drop_token", token_list, self.actor.discard_tokens)
+        UI.display_list("drop_token", token_list, self.actor.discard_tokens)
     
     def gain_iron(self):
         self.actor.add_tokens("iron", 1) # gain an iron token 

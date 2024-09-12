@@ -1,5 +1,5 @@
 from actions.action import Action
-from hud import ui
+from hud import UI
 from fadingText import FadingText
 from ursina import color
 
@@ -19,6 +19,6 @@ class GrappleAction(Action):
             return
         target = targetHex.children[0]
         actor.pull(target, die.value)
-        ui.map.targeting = None
+        UI.game_map.targeting = None
         die.consume()
     

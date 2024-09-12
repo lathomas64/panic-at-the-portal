@@ -16,7 +16,7 @@ from actions.explore import ExploreAction
 
 from die import Die
 from fadingText import FadingText
-from hud import ui
+from hud import UI
 #from ursina.prefabs.health_bar import HealthBar
 
 class Character(SpriteSheetAnimation):
@@ -81,7 +81,7 @@ class Character(SpriteSheetAnimation):
         '''
         just a check if its this character's turn
         '''
-        return ui.map.current_character == self
+        return UI.game_map.current_character == self
 
     def in_range(self, other, distance=None):
         '''
@@ -149,8 +149,8 @@ class Character(SpriteSheetAnimation):
                     destination_r += 1
                 else:
                     destination_r -= 1
-            if (destination_q, destination_r) in ui.map:
-                target.parent = ui.map[destination_q, destination_r]
+            if (destination_q, destination_r) in UI.game_map:
+                target.parent = UI.game_map[destination_q, destination_r]
             #should we have an else?
 
     def pull(self, target, amount):
@@ -244,7 +244,7 @@ class Character(SpriteSheetAnimation):
         if our teams are different or you don't have a team
         we're enemies
         '''
-        return [character for character in ui.map.turns
+        return [character for character in UI.game_map.turns
                 if character.team is None or character.team != self.team]
 
     @property
@@ -253,7 +253,7 @@ class Character(SpriteSheetAnimation):
         property for easy handle of allied characters
         if our team is the same we're allies!
         '''
-        return [character for character in ui.map.turns if character.team == self.team]
+        return [character for character in UI.game_map.turns if character.team == self.team]
 
     def start_turn(self):
         '''
@@ -279,7 +279,7 @@ class Character(SpriteSheetAnimation):
             die.enabled = False
         for action in self.actions:
             action.enabled = False
-        ui.map.advance_turn()
+        UI.game_map.advance_turn()
 
     def __str__(self):
         '''
@@ -415,7 +415,7 @@ class AICharacter(Character):
             action = self.get_action("Damage")
             print("damage action:", action)
             action.act(die)
-            ui.map.targeting["action"](self, die, target.parent)
+            UI.game_map.targeting["action"](self, die, target.parent)
             return
         if len(self.enemies_in_range(4)) > 0:
             challengable = self.enemies_in_range(4)
@@ -423,7 +423,7 @@ class AICharacter(Character):
             target = challengable[0]
             action = self.get_action("A Challenger Approaches")
             action.act(die)
-            ui.map.targeting["action"](self, die, target.parent)
+            UI.game_map.targeting["action"](self, die, target.parent)
             return
         if len(self.enemies) > 0 and len(self.available_dice(4)) > 0:
             die = self.available_dice(4)[0]
@@ -431,7 +431,7 @@ class AICharacter(Character):
             action = self.get_action("Bring it on!")
             action.act(die)
             for enemy in self.enemies:
-                ui.map.targeting["action"](self, die, enemy.parent)
+                UI.game_map.targeting["action"](self, die, enemy.parent)
             action.confirm.on_click()
             return
         # if we get here there's no action we can take
@@ -466,7 +466,7 @@ class AICharacter(Character):
             self.state.func = self.end_turn
         elif self.state == Func(self.end_turn) and self.health > 0:
             self.state = self.default_state
-        if ui.map.current_character == self:
+        if UI.game_map.current_character == self:
             if self.wait_time > 0 and self.wait_function is not None:
                 self.wait_time -= time.dt
                 if self.wait_time <= 0:

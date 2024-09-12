@@ -1,6 +1,6 @@
 from archetypes.archetype import Archetype
 from ursina import color
-from hud import ui
+from hud import UI
 from fadingText import FadingText
 
 class Angel(Archetype):
@@ -13,10 +13,10 @@ class Angel(Archetype):
         actor.challenge(target)
         #target.add_tokens("challenge", 1)
         self.drain(target)
-        ui.map.targeting = None
+        UI.game_map.targeting = None
 
     def target_drain(self):
-        ui.map.targeting = {"actor":self.actor, "action": self.confirm_targets, "die":None}
+        UI.game_map.targeting = {"actor":self.actor, "action": self.confirm_targets, "die":None}
     
     def drain(self, target):
         target.take_damage(1)

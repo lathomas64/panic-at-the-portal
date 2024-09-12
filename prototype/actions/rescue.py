@@ -1,5 +1,5 @@
 from actions.action import Action
-from hud import ui
+from hud import UI
 from fadingText import FadingText
 from ursina import color
 
@@ -20,5 +20,5 @@ class RescueAction(Action):
             return
         # TODO check if they are an ally, list for out of play allies 
         target.heal(2)
-        ui.map.targeting = None
+        UI.game_map.targeting = None
         die.consume()

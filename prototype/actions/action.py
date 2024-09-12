@@ -2,7 +2,7 @@ from ursina import Button, window, color, Tooltip
 from die import Die
 from actions.actor import Actor
 from grid import Hex
-from hud import ui
+from hud import UI
 import abc 
 
 class Action(Button):
@@ -32,13 +32,13 @@ class Action(Button):
         raise NotImplementedError("Need to specify what to do after we have targets")
     
     def act(self, die: Die):
-        ui.map.targeting = {"actor":self.actor, "action":self.confirm_targets, "die":die, "range":self.range, "targets":[]}
+        UI.game_map.targeting = {"actor":self.actor, "action":self.confirm_targets, "die":die, "range":self.range, "targets":[]}
     
     def is_available(self) -> bool:
         return self.actor.has_dice() and Die.selected != None and Die.selected.value >= self.min_die
 
     def action_finished(self, die):
-        ui.map.targeting = None 
+        UI.game_map.targeting = None 
         die.consume()
 
     def clicked(self):

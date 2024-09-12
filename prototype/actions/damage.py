@@ -1,5 +1,5 @@
 from actions.action import Action
-from hud import ui
+from hud import UI
 from fadingText import FadingText
 from ursina import color # TODO fold color from fading Text into fading text
 
@@ -49,5 +49,5 @@ class DamageAction(Action):
         else:
             print("Deal 1 damage")
             target.take_damage(1)
-        ui.map.targeting = None
+        UI.game_map.targeting = None
         die.consume()
