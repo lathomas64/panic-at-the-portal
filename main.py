@@ -3,6 +3,9 @@ Main entry point into the game
 '''
 from ursina import Animation, window, Sprite
 from ursina.prefabs.splash_screen import SplashScreen
+# import sys
+# import os
+# sys.path.append(os.path.abspath('..'))
 from prototype.character import Character, AICharacter
 from prototype.stance import Stance
 from prototype.hud import UI

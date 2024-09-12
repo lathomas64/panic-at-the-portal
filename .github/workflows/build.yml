@@ -20,5 +20,4 @@ jobs:
         pip install ursina
     - name: Build the code with Ursina Build
       run: |
-        cd prototype
         python -m ursina.build --overwrite --name "Panic at the Portal" --include_modules=../email,../zipfile

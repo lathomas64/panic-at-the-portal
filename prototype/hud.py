@@ -120,5 +120,7 @@ class Hud(Entity):
         if cls.instance is None:
             cls.instance = Hud()
         return cls.instance
-
-UI = Hud.get_ui()
+try:
+    UI = Hud.get_ui()
+except Exception as e:
+    print(f"could not get a hud: {e}")
