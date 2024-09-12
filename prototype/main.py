@@ -1,26 +1,31 @@
-from ursina import *
-from character import Character, AICharacter
+'''
+Main entry point into the game
+'''
+from ursina import Animation, window, Sprite
 from ursina.prefabs.splash_screen import SplashScreen
+from character import Character, AICharacter
+from stance import Stance
 from hud import ui
 from archetypes.angel import Angel
 from styles.halcyon import HalcyonStyle
+from forms.blaster import BlasterForm
 #trying to put everything sofar together
 
 def make_dummy(x,y):
+    '''
+    create enemies at a given location
+    '''
     dummy = AICharacter("faceless_character.png", "dummy")
     dummy.parent = ui.map[x,y]
     dummy.play_animation("walk_left")
     dummy.default_animation = "walk_left"
     dummy.state = dummy.fight
     ui.map.turns.append(dummy)
-    hex = ui.map[x,y]
-    print(hex.children)
 
 if __name__ == "__main__":
     player = Character(name="player")
-    player.archetype = Angel(player) 
-    player.style = HalcyonStyle(player) #TODO this should be through a stance not standalone
-    player.style.on_equip()
+    player.archetype = Angel(player)
+    player.stances.append(Stance(HalcyonStyle(player), BlasterForm(player)))
     player.parent = ui.map[(0,0)]
     ui.map.turns = [player]
     ui.map.explore_hex(2,0)
@@ -36,8 +41,8 @@ if __name__ == "__main__":
     window.fullscreen = True
     splash = SplashScreen()
     Sprite("background", z=1)
-    
-  
+
+
     ui.run()
     print("\n\ndoes after run happen?\n\n")
     ui.game_active = True
