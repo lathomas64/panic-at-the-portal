@@ -23,7 +23,7 @@ class OpenAction(Action):
             radius = 2
         elif die.value >= 4:
             radius = 1
-        targetHex.clearObstacles(radius)
+        targetHex.clear_obstacles(radius)
         UI.game_map.targeting = None
         die.consume() 
     
