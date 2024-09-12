@@ -1,12 +1,22 @@
+'''
+tests for the die module
+'''
 import unittest
-import sys, os 
-sys.path.append(os.path.abspath('..'))
-from ursina import *
+# import sys
+# import os
+# sys.path.append(os.path.abspath('..'))
+from ursina import Ursina, load_texture
 from prototype.die import Die
 
 class TestDie(unittest.TestCase):
+    '''
+    test cases for the Die Class
+    '''
 
     def test_initialization(self):
+        '''
+        test die initialization
+        '''
         die = Die("d4")
         self.assertEqual(die.size, 4)
         die = Die("d6")
@@ -25,9 +35,12 @@ class TestDie(unittest.TestCase):
         self.assertEqual(die.size, 7)
         die = Die("9", True)
         self.assertEqual(die.size, 9)
-    
+
     def test_create_pool(self):
-        app = Ursina()
+        '''
+        test creating a pool of dice
+        '''
+        Ursina()
         pool = Die.create_pool([])
         self.assertEqual(len(pool), 0)
         for i in range(32):
@@ -38,20 +51,26 @@ class TestDie(unittest.TestCase):
                 self.assertEqual(pool[0].size, 6)
 
     def test_update(self):
+        '''
+        test die handling update
+        '''
         die = Die("d6")
         self.assertEqual(die.visible, True)
         die.update()
         self.assertEqual(die.visible, False)
-        die.used = False 
+        die.used = False
         die.update()
         self.assertEqual(die.visible, True)
         self.assertEqual(die.texture, load_texture("d6"))
         die.clicked()
         die.update()
         self.assertEqual(die.texture, load_texture("d6_hover"))
-    
+
     def test_consume(self):
-        app = Ursina()
+        '''
+        test consuming the die
+        '''
+        Ursina()
         die = Die("d6")
         die.roll()
         die.clicked()
@@ -68,7 +87,10 @@ class TestDie(unittest.TestCase):
         self.assertEqual(die.text.text, "x")
 
     def test_roll(self):
-        app = Ursina()
+        '''
+        test rolling the die
+        '''
+        Ursina()
         die = Die("d6")
         die.roll()
         self.assertEqual(die.used, False)
@@ -77,12 +99,15 @@ class TestDie(unittest.TestCase):
         self.assertGreaterEqual(die.value, 1)
         self.assertEqual(die.text.text, str(die.value))
         die = Die("7", True)
-        die.roll() 
+        die.roll()
         self.assertEqual(die.value, 7)
         self.assertEqual(die.size, 7)
 
     def test_clicked(self):
-        app = Ursina()
+        '''
+        test clicking on the die
+        '''
+        Ursina()
         die = Die("d6")
         self.assertEqual(Die.selected, None)
         die.clicked()

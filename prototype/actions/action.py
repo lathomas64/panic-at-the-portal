@@ -1,9 +1,10 @@
+import abc
 from ursina import Button, window, color, Tooltip
-from die import Die
-from actions.actor import Actor
-from grid import Hex
-from hud import UI
-import abc 
+from prototype.die import Die
+from prototype.actions.actor import Actor
+from prototype.grid import Hex
+from prototype.hud import UI
+
 
 class Action(Button):
     basic_actions = []

@@ -1,7 +1,7 @@
-from forms.form import Form
-from die import Die
-from actions.amplify import AmplifyAction
-from actions.shockwave import ShockwaveAction
+from prototype.forms.form import Form
+from prototype.die import Die
+from prototype.actions.amplify import AmplifyAction
+from prototype.actions.shockwave import ShockwaveAction
 
 class BlasterForm(Form):
     def __init__(self, character):

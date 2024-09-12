@@ -2,21 +2,21 @@
 Game Characters and their management housed here
 '''
 from ursina import SpriteSheetAnimation, window, color, time, Func
-from actions.action import Action
-from actions.move import MoveAction
-from actions.damage import DamageAction
-from actions.throw import ThrowAction
-from actions.grapple import GrappleAction
-from actions.open import OpenAction
-from actions.douse import DouseAction
-from actions.bring import BringAction
-from actions.rescue import RescueAction
-from actions.challenge import ChallengeAction
-from actions.explore import ExploreAction
+from prototype.actions.action import Action
+from prototype.actions.move import MoveAction
+from prototype.actions.damage import DamageAction
+from prototype.actions.throw import ThrowAction
+from prototype.actions.grapple import GrappleAction
+from prototype.actions.open import OpenAction
+from prototype.actions.douse import DouseAction
+from prototype.actions.bring import BringAction
+from prototype.actions.rescue import RescueAction
+from prototype.actions.challenge import ChallengeAction
+from prototype.actions.explore import ExploreAction
 
-from die import Die
+from prototype.die import Die
 from prototype.fading_text import FadingText
-from hud import UI
+from prototype.hud import UI
 #from ursina.prefabs.health_bar import HealthBar
 
 class Character(SpriteSheetAnimation):
@@ -161,17 +161,26 @@ class Character(SpriteSheetAnimation):
         self.push(target, -1 * amount)
 
     def get_tokens(self, token_type: str) -> int:
+        '''
+        get the number of tokens of a particular type
+        a character has
+        '''
         if token_type in self.tokens:
             return self.tokens[token_type]
-        else:
-            return 0
+        return 0
 
     def challenge(self, target):
+        '''
+        add self to the list of the target's challengers
+        '''
         target.add_tokens("challenge", 1)
         target.challengers.append(self)
         self.fire_hook("after_challenge", target=target)
 
     def add_tokens(self, token_type: str, token_amount:int):
+        '''
+        add tokens to the current character
+        '''
         FadingText("+"+str(token_amount) + " " + token_type, self, color.green)
         if token_type in self.tokens:
             self.tokens[token_type] += token_amount

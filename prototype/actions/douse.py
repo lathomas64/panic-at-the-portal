@@ -1,9 +1,9 @@
-from actions.action import Action
-from hud import UI
+from prototype.actions.action import Action
+from prototype.hud import UI
 from prototype.fading_text import FadingText
 from ursina import color, destroy, Func 
 from ursina.prefabs.button_list import ButtonList
-from actions.actor import Actor
+from prototype.actions.actor import Actor
 
 class DouseAction(Action):
     def __init__(self, actor: Actor):

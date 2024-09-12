@@ -2,7 +2,7 @@
 hud handles the UI for the game
 '''
 from ursina import Ursina, ButtonList, Entity, destroy, Func, camera, color, Text
-from grid import Map
+from prototype.grid import Map
 
 
 class Hud(Entity):

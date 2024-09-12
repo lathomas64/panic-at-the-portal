@@ -69,13 +69,13 @@ class Map(Entity):
         standard ursina input
         scroll the map, zoom, or cancel targeting
         '''
-        if key == "a" or key == "a hold":
+        if key in ("a","a hold"):
             self.x += self.pan_speed * time.dt
-        elif key == "d" or key == "d hold":
+        elif key in ("d","d hold"):
             self.x -= self.pan_speed * time.dt
-        elif key == "w" or key == "w hold":
+        elif key in ("w","w hold"):
             self.y -= self.pan_speed * time.dt
-        elif key == "s" or key == "s hold":
+        elif key in ("s","s hold"):
             self.y += self.pan_speed * time.dt
         elif key == "scroll up":
             self.scale += Vec3(self.zoom_speed * time.dt)

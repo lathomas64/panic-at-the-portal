@@ -3,12 +3,12 @@ Main entry point into the game
 '''
 from ursina import Animation, window, Sprite
 from ursina.prefabs.splash_screen import SplashScreen
-from character import Character, AICharacter
-from stance import Stance
-from hud import UI
-from archetypes.angel import Angel
-from styles.halcyon import HalcyonStyle
-from forms.blaster import BlasterForm
+from prototype.character import Character, AICharacter
+from prototype.stance import Stance
+from prototype.hud import UI
+from prototype.archetypes.angel import Angel
+from prototype.styles.halcyon import HalcyonStyle
+from prototype.forms.blaster import BlasterForm
 #trying to put everything sofar together
 
 def make_dummy(x,y):

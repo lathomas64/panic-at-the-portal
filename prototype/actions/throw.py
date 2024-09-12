@@ -1,5 +1,5 @@
-from actions.action import Action
-from hud import UI
+from prototype.actions.action import Action
+from prototype.hud import UI
 from prototype.fading_text import FadingText
 from ursina import color
 

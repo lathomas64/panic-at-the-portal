@@ -1,4 +1,4 @@
-from actions.action import Action 
+from prototype.actions.action import Action 
 
 class AmplifyAction(Action):
     pass

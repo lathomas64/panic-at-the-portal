@@ -20,7 +20,7 @@ class Die(Entity):
         self.text.x = -1 * (self.text.scale.x * self.text.width) / 2
         self.on_click = self.clicked
         self.enabled = False
-        self.visible = False
+        self.visible = True
         self.texture=load_texture(size)
         self.value = None
 
@@ -33,8 +33,7 @@ class Die(Entity):
         if self.used:
             self.visible = False
             return
-        else:
-            self.visible = True
+        self.visible = True
         if self.hovered or Die.selected == self:
             self.texture = load_texture("d"+str(self.size)+"_hover")
         else:

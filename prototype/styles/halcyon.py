@@ -1,6 +1,6 @@
-from styles.style import Style 
-from actions.purify import PurifyAction
-from hud import UI
+from prototype.styles.style import Style 
+from prototype.actions.purify import PurifyAction
+from prototype.hud import UI
 from ursina import Func
 
 class HalcyonStyle(Style):
