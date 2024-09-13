@@ -15,14 +15,14 @@ class PurifyAction(Action):
                          """,
                          actor)
 
-    def confirm_targets(self, actor, die, targetHex): # TODO this just does Douse right now need to let it target allies
-        if actor.parent.distance(targetHex) > actor.range:
-            FadingText("out of range", targetHex, color.red)
+    def confirm_targets(self, actor, die, target_hex): # TODO this just does Douse right now need to let it target allies
+        if actor.parent.distance(target_hex) > actor.range:
+            FadingText("out of range", target_hex, color.red)
             return
-        if len(targetHex.children) == 0:
-            FadingText("No valid target", targetHex, color.red)
+        if len(target_hex.children) == 0:
+            FadingText("No valid target", target_hex, color.red)
             return
-        target = targetHex.children[0]
+        target = target_hex.children[0]
         tokenCount = 1
         if die.value >= 7:
             tokenCount = 3
@@ -48,7 +48,7 @@ class PurifyAction(Action):
                 token_dict[token_type] = Func(decrement_tokens, token_type)
         print(token_dict)
         if len(token_dict) <= 0:
-            FadingText("No Tokens to remove", targetHex, color.red)
+            FadingText("No Tokens to remove", target_hex, color.red)
             return
         token_list = ButtonList(token_dict, font='VeraMono.ttf', button_height=1.5, popup=0, clear_selected_on_enable=False)
         UI.game_map.targeting = None 

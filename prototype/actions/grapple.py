@@ -10,14 +10,14 @@ class GrappleAction(Action):
                "Choose an enemy or ally within range, and pull them X spaces towards you.",
                actor)
 
-    def confirm_targets(self, actor, die, targetHex):
-        if actor.parent.distance(targetHex) > actor.range:
-            FadingText("out of range", targetHex, color.red)
+    def confirm_targets(self, actor, die, target_hex):
+        if actor.parent.distance(target_hex) > actor.range:
+            FadingText("out of range", target_hex, color.red)
             return
-        if len(targetHex.children) == 0:
-            FadingText("No valid target", targetHex, color.red)
+        if len(target_hex.children) == 0:
+            FadingText("No valid target", target_hex, color.red)
             return
-        target = targetHex.children[0]
+        target = target_hex.children[0]
         actor.pull(target, die.value)
         UI.game_map.targeting = None
         die.consume()

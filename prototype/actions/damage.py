@@ -1,11 +1,17 @@
+'''
+Damage action
+'''
+from ursina import color
 from prototype.actions.action import Action
 from prototype.hud import UI
 from prototype.fading_text import FadingText
-from ursina import color # TODO fold color from fading Text into fading text
 
 class DamageAction(Action):
+    '''
+    turn dice into damage and maybe pushing
+    '''
     def __init__(self, actor):
-        super().__init__("1+", 
+        super().__init__("1+",
                "Damage", 
                 """
                 Deal 1 damage to one enemy in your range
@@ -16,18 +22,21 @@ class DamageAction(Action):
                 """,
                 actor)
 
-    def confirm_targets(self, actor, die, targetHex):
-        print(actor, die, targetHex)
-        print(targetHex.children)
-        if len(targetHex.children) == 0:
-            FadingText("No valid target", targetHex, color.red)
+    def confirm_targets(self, actor, die, target_hex):
+        '''
+        handles the actual damage when targets are selected
+        '''
+        print(actor, die, target_hex)
+        print(target_hex.children)
+        if len(target_hex.children) == 0:
+            FadingText("No valid target", target_hex, color.red)
             return
         print(actor, actor.parent)
-        if actor.parent.distance(targetHex) > actor.range:
-            FadingText("out of range", targetHex, color.red)
+        if actor.parent.distance(target_hex) > actor.range:
+            FadingText("out of range", target_hex, color.red)
             return
-        target = targetHex.children[0]
-        if type(target) == FadingText:
+        target = target_hex.children[0]
+        if isinstance(target, FadingText):
             print("we can't attack fading text...")
             return
         print("deal damage to ",target)

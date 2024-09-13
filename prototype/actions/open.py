@@ -14,16 +14,16 @@ class OpenAction(Action):
                """,
                actor)
 
-    def confirm_targets(self, actor, die, targetHex):
-        if targetHex.obstacle == None:
-            FadingText("No Obstacles here", targetHex, color.red)
+    def confirm_targets(self, actor, die, target_hex):
+        if target_hex.obstacle == None:
+            FadingText("No Obstacles here", target_hex, color.red)
             return 
         radius = 0
         if die.value >= 8:
             radius = 2
         elif die.value >= 4:
             radius = 1
-        targetHex.clear_obstacles(radius)
+        target_hex.clear_obstacles(radius)
         UI.game_map.targeting = None
         die.consume() 
     
